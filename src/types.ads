@@ -6,6 +6,7 @@ package Types is
 
    type Meter_Precision_Millimeter is delta Constants.Millimeter range
      -Constants.Kilometer .. Constants.Kilometer;
+   for Meter_Precision_Millimeter'Small use Constants.Millimeter;
 
    subtype Length is Meter_Precision_Millimeter range
      0.0 .. Meter_Precision_Millimeter'Last;

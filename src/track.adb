@@ -66,7 +66,7 @@ package body Track is
       is
          use type Segment.Vectors.Cursor;
          use type Segment.Extremity;
-         Element : Switch.Object := Switch.Vectors.Element(Position);
+         Element : constant Switch.Object := Switch.Vectors.Element(Position);
       begin
          if Element.Connexion.S1 = S
            and Element.Connexion.S1_Extremity = S_Extremity

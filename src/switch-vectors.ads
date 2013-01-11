@@ -1,3 +1,5 @@
+with Types;
+
 with Ada.Containers.Vectors;
 
 package Switch.Vectors is new Ada.Containers.Vectors
