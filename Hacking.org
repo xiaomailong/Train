@@ -16,6 +16,41 @@
 
    - Segment  :: élément  linéaire orienté  de  voie, permettant  de définir  un
                 repère curviligne.
-                - il n'existe pas d'aiguille dans un segment
+     - il n'existe pas d'aiguille dans un segment
+     - les orientations  sont définie  par /vers  une extrémité/,  une extrémité
+       étant :
+       - /Incrementing/ tel que les abscisses croissent vers cette extrémité
+       - /Decrementing/ tel que les abscisses décroissent vers cette extrémité
    - Location :: endroit sur la voie, pouvant s'exprimer comme une abscisse dans
                  le repère d'un segment arbitraire
+   - Switch :: une /aiguille/, un élément permettant de passer d'un segment à un
+               autre suivant la position courante de l'aiguille.
+     - une aiguille possède un nombre arbitraire de positions
+     - une position  relie deux  extrémités de segment,  qui peuvent  se suivre,
+       être en /face à face/, ou être /dos à dos/
+     - une  aiguille est  à  un instant  soit /Unset/,  soit  dans une  position
+       reliant deux extrémités de segment
+   - Track  ::  une voie,  un  ensemble  de  segments  et d'aiguilles  dont  les
+              positions relient les segments.
+     - une  extrémité de  segment  ne peut  être liée  qu'à  une position  d'une
+       aiguille
+     - un segment ou un groupe de segment peuvent être isolés
+
+** Fonctions
+
+   - \*.Create ::  tous les instances  objets sont  crées avec cette  fonction
+   - Track.Add_\* :: Ajouté un élément à la voie.
+     - Track.Add_Link permet de  créer le lien entre deux  extrémités de segment
+       par une aiguille déjà ajoutée et pour une position donnée
+   - Location.Abscissa   ::  récupère  l'abscisse  d'une position  sur la  voie,
+        relativement à son segment de référence,  ou d'un segment lié suivant la
+        position des aiguilles
+        - déclenche   =No_Link_With_Segment=   si    la   position   n'est   pas
+          représentable dans relativement au segment
+   - Location.equal   ::   deux   positions   équivalentes   (abscisses   égales
+                       relativement au même segment)
+   - Switch.[Un]set :: détermine la position dynamique d'une aiguille
+   - Track.Next  ::  désigne l'extrémité  de  segment  reliée par  une  aiguille
+                   positionnée à une autre extrémité de segment
+                   - déclencre =No_Next_Segment= s'il n'y a pas de segment lié à
+                     cette extrémité

@@ -1,2 +1,4 @@
 *.ali
 *.o
+src/check/
+src/doc/
