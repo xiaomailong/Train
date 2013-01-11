@@ -1,0 +1,21 @@
+#+TITLE:     Contrôle de système ferroviaire
+#+AUTHOR:    Baptiste Fouques
+#+EMAIL:     bateast@bat.fr.eu.org
+#+DATE:      2013-01-10 jeu.
+#+OPTIONS:   H:5 num:t toc:nil \n:nil @:t ::t |:t ^:{} -:t f:t *:t <:t
+
+* Structure du code
+
+** Unités et grandeurs
+
+   - Length :: une longueur, positive, en mètre, précision au millimètre
+   - Abscissa :: un index de position  relative, positive ou négative, en mètre,
+                 précision au millimètre
+
+** Objets
+
+   - Segment  :: élément  linéaire orienté  de  voie, permettant  de définir  un
+                repère curviligne.
+                - il n'existe pas d'aiguille dans un segment
+   - Location :: endroit sur la voie, pouvant s'exprimer comme une abscisse dans
+                 le repère d'un segment arbitraire
