@@ -90,6 +90,11 @@ package body Track is
    begin
       This.Switchs.Iterate (Switch_Lookout'access);
 
+      -- Be careful, we got the extremity linked by the switch,
+      -- not the extremity in the same global direction than input.
+      -- We need to get the opposite one.
+      S_Extremity := Segment.Opposite_Extremity (S_Extremity);
+
       if not Found then
          raise No_Next_Segment;
       end if;
