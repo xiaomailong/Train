@@ -41,6 +41,13 @@ package Track is
                    S_Extremity : in out Segment.Extremity
                   );
 
+   -- Switch operations
+   procedure Unset (This : in out Object; S : Switch.Vectors.Cursor);
+   procedure Set (
+                  This : in out Object;
+                  S : Switch.Vectors.Cursor;
+                  Switch_Position : Switch.Position);
+
    No_Next_Segment : exception;
 
 private

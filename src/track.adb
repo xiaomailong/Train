@@ -1,3 +1,5 @@
+with Track.Switch_Operations;
+
 package body Track is
 
    function Create return Object is
@@ -99,5 +101,15 @@ package body Track is
          raise No_Next_Segment;
       end if;
    end Next;
+
+   -- From switch_operation child package
+
+   procedure Unset (This : in out Object; S : Switch.Vectors.Cursor)
+     renames Track.Switch_Operations.Unset;
+   procedure Set (
+                  This : in out Object;
+                  S : Switch.Vectors.Cursor;
+                  Switch_Position : Switch.Position)
+     renames Track.Switch_Operations.Set;
 
 end Track;
