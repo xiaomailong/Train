@@ -68,6 +68,7 @@ package body Location is
 
             Dynamic_Track.Next (Cursor, Cursor_Extremity);
 
+            exit when Cursor = This.Reference;
          exception
             when Track.No_Next_Segment =>
                exit Incrementing_Loop;
