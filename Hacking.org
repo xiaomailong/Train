@@ -52,7 +52,7 @@
    - Switch.[Un]set :: détermine la position dynamique d'une aiguille
    - Track.Next   ::   désigne l'extrémité  de  prochain  segment dans  la  même
                      orientation que celle fournie
-                   - déclencre =No_Next_Segment= s'il n'y a pas de segment lié à
+                   - déclenche =No_Next_Segment= s'il n'y a pas de segment lié à
                      cette extrémité
 
    #+Caption: Incrementing and decrementing, Next operation.
@@ -66,3 +66,44 @@
 
    /Next/ (B, /Incrementing/)  est C /Decrementing/,  /Next/ (B, /Decrementing/)
    est A /Decrementing/.
+** Tests
+
+*** =Test_Track::Eyebrown=
+
+    Création d'une voie avec un chapeau de gendarme au dessus d'un segment nommé
+    /Main_Segment/.
+
+    Le chapeau  de gendarme est  symétrique avec  chaque bord d'une  longueur de
+    5 m, le segment de base de 15 m, et le segment du dessus de 25 m.
+
+    Pour tester les retournement d'orientation, le segment du dessus est orienté
+    à l'inverse des autres segments.
+
+    Trois points sont placés sur la voie :
+    - L1 :: sur le bord amont, à l'abscisse 1 m
+    - L2 :: sur le bord aval, à l'abscisse 3 m
+    - L3 :: sur le segment supérieur, à l'abscisse 10 m
+
+    #+caption: Plan de /Test_Track::Eyebrown/
+    #+BEGIN_SRC ditaa :file img/eyebrown.png
+                                            L3
+                   /-------------------------*-----\
+                   |        15m                 10m|
+        L1         v                               |     L2
+      ,*--*-------->*------------------------------>*------*---->
+        1m    4m                   15m                 3m   2m
+
+    #+END_SRC
+
+    #+RESULTS:
+    [[file:img/eyebrown.png]]
+
+    Le calcul  des distances signées  entre les  points suivant la  position des
+    aiguilles permet de vérifier le bon  chaînage des segments, et le calcul des
+    abscisses relativement à un segment arbitraire.
+
+    - L2 - L1 par le bas :: 22 m
+    - L2 - L1 par le haut :: 32 m
+    - L3 - L1 :: 19 m
+    - L2 - L3 :: - ((/L2 - L1/) - (/L3 - L1/))                                \\
+      la négation vient du référentiel de /L3/ sur lequel on fait le calcul
