@@ -5,6 +5,7 @@ package Segment is
    type Object is tagged private;
 
    type Extremity is (Decrementing, Incrementing);
+   function Opposite_Extremity (E : Extremity) return Extremity;
 
    function Create (
                     Length : Types.Length

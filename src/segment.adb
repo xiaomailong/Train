@@ -16,4 +16,13 @@ package body Segment is
       return This.Max_Abscissa;
    end Max_Abscissa;
 
+   function Opposite_Extremity (E : Extremity) return Extremity
+   is
+   begin
+      case E is
+         when Incrementing => return Decrementing;
+         when Decrementing => return Incrementing;
+      end case;
+   end Opposite_Extremity;
+
 end Segment;
