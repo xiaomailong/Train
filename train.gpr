@@ -15,5 +15,7 @@ project Train is
       for Default_Switches ("ada") use ("-g");
    end Binder;
 
+   for Main use ("test_track.adb");
+
 end Train;
 
