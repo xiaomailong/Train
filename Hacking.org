@@ -50,7 +50,19 @@
    - Location.equal   ::   deux   positions   équivalentes   (abscisses   égales
                        relativement au même segment)
    - Switch.[Un]set :: détermine la position dynamique d'une aiguille
-   - Track.Next  ::  désigne l'extrémité  de  segment  reliée par  une  aiguille
-                   positionnée à une autre extrémité de segment
+   - Track.Next   ::   désigne l'extrémité  de  prochain  segment dans  la  même
+                     orientation que celle fournie
                    - déclencre =No_Next_Segment= s'il n'y a pas de segment lié à
                      cette extrémité
+
+   #+Caption: Incrementing and decrementing, Next operation.
+   #+BEGIN_SRC ditaa :file img/next.png
+      *------->*------->*<-------*
+          A        B         C
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:img/next.png]]
+
+   /Next/ (B, /Incrementing/)  est C /Decrementing/,  /Next/ (B, /Decrementing/)
+   est A /Decrementing/.
