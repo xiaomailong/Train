@@ -1,5 +1,4 @@
 with Constants;
-
 package body Location is
 
    function Create
@@ -14,14 +13,6 @@ package body Location is
                     );
    end Create;
 
-   function Abscissa (This : Object)
-                     return Types.Abscissa
-   is
-   begin
-      return Abscissa (This, This.Reference_Segment);
-   end Abscissa;
-
-
    function Reference (This : Object)
                       return Segment.Vectors.Cursor
    is
@@ -29,16 +20,11 @@ package body Location is
       return This.Reference_Segment;
    end Reference;
 
-   function Abscissa (This : Object; Relative : in Segment.Vectors.Cursor)
-                     return Types.Abscissa is
-      use type Segment.Vectors.Cursor;
+   function Abscissa (This : Object)
+                     return Types.Abscissa
+   is
    begin
-      if Relative = This.Reference_Segment
-      then
-         return This.Reference_Abscissa;
-      else
-         raise No_Link_With_Segment;
-      end if;
+      return This.Reference_Abscissa;
    end Abscissa;
 
    function Abscissa (
@@ -120,11 +106,59 @@ package body Location is
 
    end Abscissa;
 
-   function equal (A : Object; B : Object) return Boolean
+   -----------
+   -- Topologic functions
+   -----------
+
+   function Normalize (This : Object; Current_Track : Track.Object)
+                      return Object
+   is
+      Cursor : Segment.Vectors.Cursor;
+      Cursor_Extremity : Segment.Extremity;
+
+      Result : Object := This;
+      Result_Extremity : Segment.Extremity;
+
+      use type Types.Meter_Precision_Millimeter;
+      use type Segment.Extremity;
+   begin
+      if This.Abscissa >= 0.0 then
+         Result_Extremity := Segment.Incrementing;
+      else
+         Result_Extremity := Segment.Decrementing;
+      end if;
+      Cursor := Result.Reference;
+      Cursor_Extremity := Result_Extremity;
+
+      while not (Result.Abscissa
+                   in 0.0 ..
+                   Segment.Vectors.Element (Result.Reference).Max_Abscissa)
+      loop
+         Current_Track.Next (Cursor, Cursor_Extremity);
+
+         if Result_Extremity = Segment.Incrementing then
+            Result.Reference_Abscissa := Result.Abscissa
+              - Segment.Vectors.Element (Result.Reference).Max_Abscissa;
+         end if;
+         if Cursor_Extremity = Segment.Decrementing then
+            Result.Reference_Abscissa := Result.Abscissa
+              - Segment.Vectors.Element (Cursor).Max_Abscissa;
+         end if;
+         Result.Reference_Segment := Cursor;
+         Result_Extremity := Cursor_Extremity;
+      end loop;
+
+      return Result;
+   end Normalize;
+
+   function Equal
+     (Current_Track : Track.Object;
+      Left, Right : Object)
+     return Boolean
    is
       use type Types.Meter_Precision_Millimeter;
    begin
-      if A.Abscissa - B.Abscissa(Current_Track, A.Reference)
+      if Left.Abscissa - Right.Abscissa(Current_Track, Left.Reference)
         in -Constants.Millimeter .. Constants.Millimeter
       then
          return True;
@@ -135,7 +169,76 @@ package body Location is
    exception
       when No_Link_With_Segment =>
          return False;
-   end equal;
+   end Equal;
 
+   function LowerThan
+     (Current_Track : Track.Object;
+      Reference : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return Boolean
+   is
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      if Left.Abscissa (Current_Track, Reference)
+        < Right.Abscissa (Current_Track, Reference)
+      then
+         return True;
+      else
+         return False;
+      end if;
+
+   exception
+      when No_Link_With_Segment =>
+         return False;
+   end LowerThan;
+
+   function LowerThan
+     (Current_Track : Track.Object;
+      Left, Right : Object)
+      return Boolean
+   is
+   begin
+      return Lowerthan (Current_Track, Left.Reference, Left, Right);
+   end LowerThan;
+
+   function Add
+     (
+      Current_Track : Track.Object;
+      Reference : Segment.Vectors.Cursor;
+      Left : Object;
+      Right : Types.Abscissa
+     )
+     return Object
+   is
+      Result : Object;
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      Result := (
+                 Reference_Abscissa =>
+                   Left.Abscissa (Current_Track, Reference) + Right,
+                 Reference_Segment => Reference
+                );
+      return Result.Normalize (Current_Track);
+   end Add;
+
+   function Add
+     (Current_Track : Track.Object;
+      Left : Object;
+      Right : Types.Abscissa)
+      return Object
+   is
+   begin
+      return Add (Current_Track, Left.Reference, Left, Right);
+   end Add;
+
+   function Minus
+     (Current_Track : Track.Object;
+      Left, Right : Object)
+      return Types.Abscissa
+   is
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      return Left.Abscissa - Right.Abscissa (Current_Track, Left.Reference);
+   end Minus;
 
 end Location;
