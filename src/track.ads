@@ -35,11 +35,34 @@ package Track is
 
    -- Get track objects
 
+   function Element (
+                     S : Segment.Vectors.Cursor
+                    )
+                    return Segment.Object;
+   function Element (
+                     S : Switch.Vectors.Cursor
+                    )
+                    return Switch.Object;
+
    procedure Next (
                    This : in Object;
                    S : in out Segment.Vectors.Cursor;
                    S_Extremity : in out Segment.Extremity
                   );
+
+   function Relative_Extremity (
+                                This : Object;
+                                Reference : Segment.Vectors.Cursor;
+                                Location : Segment.Vectors.Cursor;
+                                Location_Extremity : Segment.Extremity
+                               )
+                               return Segment.Extremity;
+
+   procedure End_Of_Route (
+                           This : Object;
+                           S : in out Segment.Vectors.Cursor;
+                           S_Extremity : in out Segment.Extremity
+                       );
 
    -- Switch operations
    procedure Unset (This : in out Object; S : Switch.Vectors.Cursor);
@@ -49,6 +72,7 @@ package Track is
                   Switch_Position : Switch.Position);
 
    No_Next_Segment : exception;
+   Unexpected_Loop : exception;
 
 private
 

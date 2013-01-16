@@ -102,6 +102,80 @@ package body Track is
       end if;
    end Next;
 
+   function Relative_Extremity (
+                                This : Object;
+                                Reference : Segment.Vectors.Cursor;
+                                Location : Segment.Vectors.Cursor;
+                                Location_Extremity : Segment.Extremity
+                               )
+                               return Segment.Extremity
+   is
+     use type Segment.Vectors.Cursor;
+
+      Cursor : Segment.Vectors.Cursor;
+      Cursor_Extremity : Segment.Extremity;
+   begin
+
+      Cursor := Location;
+      Cursor_Extremity := Location_Extremity;
+      while Cursor /= Reference
+      loop
+         begin
+            This.Next (Cursor, Cursor_Extremity);
+
+         exception
+            when Track.No_Next_Segment =>
+               exit;
+         end;
+      end loop;
+
+      if Cursor = Reference
+      then
+         return Cursor_Extremity;
+      end if;
+
+      Cursor := Location;
+      Cursor_Extremity := Segment.Opposite_Extremity (Location_Extremity);
+      while Cursor /= Reference
+      loop
+         begin
+            This.Next (Cursor, Cursor_Extremity);
+         end;
+      end loop;
+
+      if Cursor = Reference
+      then
+         return Segment.Opposite_Extremity (Cursor_Extremity);
+      end if;
+
+      raise No_Next_Segment;
+
+   end Relative_Extremity;
+
+
+   procedure End_Of_Route (
+                           This : Object;
+                           S : in out Segment.Vectors.Cursor;
+                           S_Extremity : in out Segment.Extremity
+                          )
+   is
+      use type Segment.Vectors.Cursor;
+      Cursor : Segment.Vectors.Cursor := S;
+      Cursor_Extremity : Segment.Extremity := S_Extremity;
+   begin
+      loop
+         This.Next (Cursor, Cursor_Extremity);
+         exit when Cursor = S;
+      end loop;
+
+      raise Unexpected_Loop;
+
+   exception
+      when No_Next_Segment =>
+         S := Cursor;
+         S_Extremity := Cursor_Extremity;
+   end End_Of_Route;
+
    -- From switch_operation child package
 
    procedure Unset (This : in out Object; S : Switch.Vectors.Cursor)
@@ -111,5 +185,23 @@ package body Track is
                   S : Switch.Vectors.Cursor;
                   Switch_Position : Switch.Position)
      renames Track.Switch_Operations.Set;
+
+   function Element (
+                     S : Segment.Vectors.Cursor
+                    )
+                    return Segment.Object
+   is
+   begin
+      return Segment.Vectors.Element (S);
+   end Element;
+
+   function Element (
+                     S : Switch.Vectors.Cursor
+                    )
+                    return Switch.Object
+   is
+   begin
+      return Switch.Vectors.Element (S);
+   end Element;
 
 end Track;
