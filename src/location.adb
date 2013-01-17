@@ -47,18 +47,15 @@ package body Location is
       Cursor_Extremity := Segment.Incrementing;
   Incrementing_Loop :
       while Cursor /= Relative
+        and then Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
-         begin
-            Delta_Segment := Delta_Segment
-              + Segment.Vectors.Element (Cursor).Max_Abscissa;
+         Delta_Segment := Delta_Segment
+           + Segment.Vectors.Element (Cursor).Max_Abscissa;
 
-            Dynamic_Track.Next (Cursor, Cursor_Extremity);
+         Dynamic_Track.Next (Cursor, Cursor_Extremity);
 
-            exit when Cursor = This.Reference;
-         exception
-            when Track.No_Next_Segment =>
-               exit Incrementing_Loop;
-         end;
+         -- Exit in case of loop
+         exit Incrementing_Loop when Cursor = This.Reference;
       end loop Incrementing_Loop;
 
       if Cursor = Relative
@@ -75,19 +72,13 @@ package body Location is
       Delta_Segment := 0.0;
       Cursor := This.Reference;
       Cursor_Extremity := Segment.Decrementing;
-  Decrementing_Loop :
       while Cursor /= Relative
+        and then Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
-         begin
             Dynamic_Track.Next (Cursor, Cursor_Extremity);
             Delta_Segment := Delta_Segment
               + Segment.Vectors.Element (Cursor).Max_Abscissa;
-
-         exception
-            when Track.No_Next_Segment =>
-               raise No_Link_With_Segment;
-         end;
-      end loop Decrementing_Loop;
+      end loop;
 
       if Cursor = Relative
       then
@@ -177,8 +168,13 @@ package body Location is
       Left, Right : Object)
       return Boolean
    is
+      Cursor : Segment.Vectors.Cursor := Left.Reference;
+      Cursor_Extremity : Segment.Extremity := Segment.Incrementing;
       use type Types.Meter_Precision_Millimeter;
    begin
+      -- Raise exception if there is a loop
+      Current_Track.End_Of_Route (Cursor, Cursor_Extremity);
+
       if Left.Abscissa (Current_Track, Reference)
         < Right.Abscissa (Current_Track, Reference)
       then
