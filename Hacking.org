@@ -23,6 +23,11 @@
        - /Decrementing/ tel que les abscisses décroissent vers cette extrémité
    - Location :: endroit sur la voie, pouvant s'exprimer comme une abscisse dans
                  le repère d'un segment arbitraire
+   - Location.Oriented ::   un  endroit associé à une orientation  relatif à son
+        segment. L'orientation  est défini comme /vers  l'extrémité du segment/,
+        et s'exprime  comme une extrémité de  segment. /Incrementing/ représente
+        donc l'orientation  du segment et /Decrementing/  défini une orientation
+        opposée à celle du segment.
    - Switch :: une /aiguille/, un élément permettant de passer d'un segment à un
                autre suivant la position courante de l'aiguille.
      - une aiguille possède un nombre arbitraire de positions
@@ -39,21 +44,55 @@
 ** Fonctions
 
    - \*.Create ::  tous les instances  objets sont  crées avec cette  fonction
+
+*** Gestion de la voie
+
    - Track.Add_\* :: Ajouté un élément à la voie.
      - Track.Add_Link permet de  créer le lien entre deux  extrémités de segment
        par une aiguille déjà ajoutée et pour une position donnée
+   - Track.Element :: À partir d'un /curseur/ lié à un élément ajouté à la voie,
+                      fournie l'objet complet
+
+*** Segments et aiguilles
+
+   - Segment.Ends.Zero  ::  Fournit  le   point  orienté  /vers  l'extérieur/  à
+        l'abscisse 0 d'un segment.
+   - Segment.Ends.Max  ::  Fournit  le  dernier point  normalisé  orienté  /vers
+        l'extérieur/ d'un segment
+   - Switch.[Un]set :: détermine la position dynamique d'une aiguille
+
+*** Points et points orientés
+
    - Location.Abscissa   ::  récupère  l'abscisse  d'une position  sur la  voie,
         relativement à son segment de référence,  ou d'un segment lié suivant la
         position des aiguilles
-        - déclenche   =No_Link_With_Segment=   si    la   position   n'est   pas
-          représentable dans relativement au segment
-   - Location.equal   ::   deux   positions   équivalentes   (abscisses   égales
-                       relativement au même segment)
-   - Switch.[Un]set :: détermine la position dynamique d'une aiguille
+     - déclenche   =No_Link_With_Segment=   si    la   position   n'est   pas
+       représentable dans relativement au segment
+   - Location.Normalize   ::    fournit une position équivalent  exprimée sur le
+        segment         permettant        d'avoir         l'abscisse        dans
+        [0..Max(/segment/)]. Attention,  suivant la  position des  aiguilles, le
+        résultat peut différer
+     - déclenche =No_Next_Segment==
+   - Location.Oriented.Extremity :: fourni l'orientation du point relativement à
+        un segment arbitraire ou à son segment de référence
+     - déclenche =No_Next_Segment=
+
+*** Déplacement sur la voie
+
+   - Track:Is_Linked ::  À partir d'un segment et d'une extrémité, retourne s'il
+        existe un autre segment lié
    - Track.Next   ::   désigne l'extrémité  de  prochain  segment dans  la  même
                      orientation que celle fournie
-                   - déclenche =No_Next_Segment= s'il n'y a pas de segment lié à
-                     cette extrémité
+     - déclenche =No_Next_Segment= s'il n'y a pas de segment lié à
+       cette extrémité
+   - Track.Relative_Extremity   :: à  partir d'un  segment et  d'une orientation
+        /vers l'extrémité  du segment/, fournit  cette orientation sur  un autre
+        segment lié arbitraire
+     - déclenche =No_Next_Segment=
+   - Track.End_Of_Route :: à partir d'un segment et d'une orientation, fourni le
+        dernier segment lié et l'orientation (voir /Track.Next/) après itération
+        de /Track.Next/.
+        - déclenche =Unexpected_Loop= s'il n'existe pas de /dernier/ segment
 
    #+Caption: Incrementing and decrementing, Next operation.
    #+BEGIN_SRC ditaa :file img/next.png
@@ -66,44 +105,141 @@
 
    /Next/ (B, /Incrementing/)  est C /Decrementing/,  /Next/ (B, /Decrementing/)
    est A /Decrementing/.
-** Tests
 
-*** =Test_Track::Eyebrown=
+** Opérateurs topologiques
 
-    Création d'une voie avec un chapeau de gendarme au dessus d'un segment nommé
-    /Main_Segment/.
+   Les opérateurs usuels  sont accessibles sur les  /Locations/.  Les opérateurs
+   nécessitant une orientation  ("-", "+", "<") dépendent de la  base relative à
+   un  segment  de  référence  s'il  est fournit  (opérateur  non  binaire),  ou
+   l'orientation relative de l'opérante /de gauche/.
 
-    Le chapeau  de gendarme est  symétrique avec  chaque bord d'une  longueur de
-    5 m, le segment de base de 15 m, et le segment du dessus de 25 m.
+   Les  opérateurs   impliquant  des   /locations/  orientées   sont  effectuées
+   relativement à l'orientation de l'opérande  /de gauche/ plutôt que du segment
+   sur lequel il est décrit.
 
-    Pour tester les retournement d'orientation, le segment du dessus est orienté
-    à l'inverse des autres segments.
+   #+BEGIN_SRC ditaa :file img/topo_lt.png
+              +->            +->
+              |              |
+        *----------->*<-----------*
+              L1              L2
+   #+END_SRC
 
-    Trois points sont placés sur la voie :
-    - L1 :: sur le bord amont, à l'abscisse 1 m
-    - L2 :: sur le bord aval, à l'abscisse 3 m
-    - L3 :: sur le segment supérieur, à l'abscisse 10 m
+   #+RESULTS:
+   [[file:img/topo_lt.png]]
 
-    #+caption: Plan de /Test_Track::Eyebrown/
-    #+BEGIN_SRC ditaa :file img/eyebrown.png
-                                            L3
-                   /-------------------------*-----\
-                   |        15m                 10m|
-        L1         v                               |     L2
-      ,*--*-------->*------------------------------>*------*---->
-        1m    4m                   15m                 3m   2m
+   /L1 < L2 and L2.Non_Oriented < L1.Non_Oriented/
 
-    #+END_SRC
+   - Equal, "=" ::  pour deux points, même abscisse  et orientation relativement
+                   au même segment de référence.
+     - symétrique, transitif, réflexive
+   - Lowerthan,  "<"  ::   pour deux points, relation d'ordre  sur les abscisses
+        relativement à  l'orientation de  l'opérande de  gauche (de  son segment
+        s'il n'est pas orienté).
+     - déclenche  =Location_Are_Not_Comparable=  si   les  deux  points  sont
+       orientés et s'il n'ont pas la même orientation relative
+     - déclenche =No_Link_With_Segment= si les points ne sont pas liés
+     - déclenche =Unexpected_Loop= s'il existe une bouche de segments reliant un
+       opérande à lui-même
+   - Add, "+"   :: pour un  point et une abscisse,  retourne le point  décalé de
+                  l'abscisse, normalisé
+     - déclenche =No_Next_Segment== si le point n'est pas normalisable
+     - l'opération /point - abs/ est la conjonction /point + \sdot - abs/
+   - Minus, "-" ::  pour deux points,  retourne la différence d'abscisse (sur le
+                    même   segment)  entre   les   de   points  relativement   à
+                    l'orientation du premier opérande
 
-    #+RESULTS:
-    [[file:img/eyebrown.png]]
+* Tests
 
-    Le calcul  des distances signées  entre les  points suivant la  position des
-    aiguilles permet de vérifier le bon  chaînage des segments, et le calcul des
-    abscisses relativement à un segment arbitraire.
+** =Test_Track::Eyebrown=
 
-    - L2 - L1 par le bas :: 22 m
-    - L2 - L1 par le haut :: 32 m
-    - L3 - L1 :: 19 m
-    - L2 - L3 :: - ((/L2 - L1/) - (/L3 - L1/))                                \\
-      la négation vient du référentiel de /L3/ sur lequel on fait le calcul
+   Création d'une voie avec un chapeau de gendarme au dessus d'un segment nommé
+   /Main_Segment/.
+
+   Le chapeau  de gendarme est  symétrique avec  chaque bord d'une  longueur de
+   5 m, le segment de base de 15 m, et le segment du dessus de 25 m.
+
+   Pour tester les retournement d'orientation, le segment du dessus est orienté
+   à l'inverse des autres segments.
+
+   Trois points sont placés sur la voie :
+   - L1 :: sur le bord amont, à l'abscisse 1 m
+   - L2 :: sur le bord aval, à l'abscisse 3 m
+   - L3 :: sur le segment supérieur, à l'abscisse 10 m
+
+   #+caption: Plan de /Test_Track::Eyebrown/
+   #+BEGIN_SRC ditaa :file img/eyebrown.png
+                                           L3
+                  /-------------------------*-----\
+                  |        15m                 10m|
+       L1         v                               |     L2
+     ,*--*-------->*------------------------------>*------*---->
+       1m    4m                   15m                 3m   2m
+
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:img/eyebrown.png]]
+
+   Le calcul  des distances signées  entre les  points suivant la  position des
+   aiguilles permet de vérifier le bon  chaînage des segments, et le calcul des
+   abscisses relativement à un segment arbitraire.
+
+   - L2 - L1 par le bas :: 22 m
+   - L2 - L1 par le haut :: 32 m
+   - L3 - L1 :: 19 m
+   - L2 - L3 :: - ((/L2 - L1/) - (/L3 - L1/))                                \\
+     la négation vient du référentiel de /L3/ sur lequel on fait le calcul
+
+** Test_Track::Circle_Line
+
+   Voie circulaire avec une section double.
+
+   L'orientation de la partie double à l'inverse de la boucle.
+
+   Chaque aiguille est entourées de  points orientés /vers l'aiguille/ (signaux)
+   sur chacune de ses branche (aiguille, normal, inverse).
+
+   #+BEGIN_SRC ditaa :file img/circle_line.png
+
+
+                    <-+                         +->
+                      |                         |
+                /-----x-------------------------x-------\
+                |      S_2_R       High       S_1_R     |
+                |                                       |
+                |   <-+                         +->     |
+                v     |                         |       |
+           ^ /->*-----x-------------------------x------>*--\ ^
+     S_2_S | |  2      S_2_N        L1        S_1_N     1  | |
+           +-x                                             x-+ S_1_S
+             |                                             |
+             \---------------------------------------------/
+                                    L2
+
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:img/circle_line.png]]
+
+   La construction  des signaux est faite  grâce à l'opérateur "+"  appliqué sur
+   l'extrémité   de    chaque   segment.     Cela   implique    les   opérations
+   /Segment.Ends.Zero/,         /Segment.Ends.Max/        et         l'opération
+   /Location.Oriented.Add/.
+
+   En construisant le chaînage L1 \rarr L2 \rarr High, on vérifie les opérations :
+   - S_1_N < S_2_S et S_2_S < S_1_R
+   - S_2_R < S_1_S et S_1_S < S_2_N
+   En  utilisant les  points  non-orientés,  on se  réfère  à l'orientation  des
+   segments de référence :
+   - |S_2_N| < |S_1_S|
+   On vérifie l'interdiction de comparer deux points /mal orientés/ :
+   - S_1_N <^{?} S_2_R
+     - \rarr =Location_Are_Not_Comparable=
+
+   En construisant la boucle L1 \rarr L2 \rarr L1, on vérifie l'interdiction de comparer
+   deux points s'il existe une boucle :
+   - S_1_N <^{?} S_2_S
+     - \rarr =Unexpected_Loop=
+   On vérifie le calcul des distances orientés entre deux points :
+   - S_2_S - S_1_N = |L2|
+   - S_1_N - S_2_S = |L1|
