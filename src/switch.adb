@@ -50,6 +50,9 @@ package body Switch is
       This.Current_Position := Switch_Position;
    end Set;
 
+   function Is_Set (This : in Object) return Boolean
+   is begin return This.Is_Set; end Is_Set;
+
    function Id (Key : Position) return Ada.Containers.Hash_Type is
    begin
       return  Ada.Containers.Hash_Type(Key);

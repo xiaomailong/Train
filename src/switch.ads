@@ -33,6 +33,7 @@ package Switch is
                        );
 
    procedure Unset (This : in out Object);
+   function Is_Set (This : in Object) return Boolean;
    procedure Set (This : in out Object; Switch_Position : Position);
    function Connexion(This : Object) return Link;
 
