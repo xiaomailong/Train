@@ -2,20 +2,19 @@ project Train is
 
    for Source_Dirs use ("src/**");
    for Object_Dir use "src/";
+   for Main use ("test_track.adb");
 
    package Builder is
       for Default_Switches ("ada") use ("-g");
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-g", "-O2", "-gnatwae", "-gnat05");
+      for Default_Switches ("ada") use ("-g", "-gnatwea", "-gnat05", "-O2", "-gnatVa", "-gnato", "-gnatp", "-fstack-check", "-gnatE", "-gnata");
    end Compiler;
 
    package Binder is
       for Default_Switches ("ada") use ("-g");
    end Binder;
-
-   for Main use ("test_track.adb");
 
 end Train;
 
