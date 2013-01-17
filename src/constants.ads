@@ -14,6 +14,7 @@
 --  this program.  If not, see http://www.gnu.org/licenses/.
 
 package Constants is
+   pragma Pure;
 
    Millimeter : constant := 0.001;
    Kilometer : constant := 1_000.0;

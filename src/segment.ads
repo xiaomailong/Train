@@ -16,6 +16,7 @@
 with Types;
 
 package Segment is
+   pragma Pure;
 
    type Object is tagged private;
 

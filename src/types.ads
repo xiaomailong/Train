@@ -16,6 +16,7 @@
 with Constants;
 
 package Types is
+   pragma Pure;
 
    type Index_Type is range 1 .. Constants.Number_Max_Of_Elements;
 
