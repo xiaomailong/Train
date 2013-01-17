@@ -2,6 +2,12 @@ with Track.Switch_Operations;
 
 package body Track is
 
+   procedure Switch_Lookout (Position : in Switch.Vectors.Cursor;
+                             S : in out Segment.Vectors.Cursor;
+                             S_Extremity : in out Segment.Extremity;
+                             Found : out Boolean
+                            );
+
    function Create return Object is
    begin
       return Object'(
@@ -56,20 +62,19 @@ package body Track is
       This.Switchs.Replace_Element (Link_Switch, Actual_Switch);
    end Add_Link;
 
-   procedure Next (
-                   This : in Object;
-                   S : in out Segment.Vectors.Cursor;
-                   S_Extremity : in out Segment.Extremity
-                  )
+   procedure Switch_Lookout (Position : in Switch.Vectors.Cursor;
+                             S : in out Segment.Vectors.Cursor;
+                             S_Extremity : in out Segment.Extremity;
+                             Found : out Boolean
+                            )
    is
+      use type Segment.Vectors.Cursor;
+      use type Segment.Extremity;
+      Element : constant Switch.Object := Switch.Vectors.Element(Position);
+   begin
+      Found := False;
 
-      Found : Boolean := False;
-      procedure Switch_Lookout (Position : in Switch.Vectors.Cursor)
-      is
-         use type Segment.Vectors.Cursor;
-         use type Segment.Extremity;
-         Element : constant Switch.Object := Switch.Vectors.Element(Position);
-      begin
+      if Element.Is_Set then
          if Element.Connexion.S1 = S
            and Element.Connexion.S1_Extremity = S_Extremity
          then
@@ -83,23 +88,53 @@ package body Track is
             S := Element.Connexion.S1;
             S_Extremity := Element.Connexion.S1_Extremity;
          end if;
+      end if;
 
-      exception
-         when Switch.Unset_Switch =>
-            null;
-      end Switch_Lookout;
+   end Switch_Lookout;
 
+   function Is_Linked (
+                       This : in Object;
+                       S : in Segment.Vectors.Cursor;
+                       S_Extremity : in Segment.Extremity
+                      )
+                      return Boolean
+   is
+      Found : Boolean := False;
+      procedure Switch_Iteration (Position : in Switch.Vectors.Cursor)
+      is
+         S_I : Segment.Vectors.Cursor := S;
+         S_Extremity_I : Segment.Extremity := S_Extremity;
+      begin
+         if not Found then
+            Switch_Lookout (Position, S_I, S_Extremity_I, Found);
+         end if;
+      end Switch_Iteration;
    begin
-      This.Switchs.Iterate (Switch_Lookout'access);
+      This.Switchs.Iterate (Switch_Iteration'access);
+      return Found;
+   end;
+
+   procedure Next (
+                   This : in Object;
+                   S : in out Segment.Vectors.Cursor;
+                   S_Extremity : in out Segment.Extremity
+                  )
+   is
+      Found : Boolean := False;
+      procedure Switch_Iteration (Position : in Switch.Vectors.Cursor)
+      is
+      begin
+         if not Found then
+            Switch_Lookout (Position, S, S_Extremity, Found);
+         end if;
+      end Switch_Iteration;
+   begin
+      This.Switchs.Iterate (Switch_Iteration'access);
 
       -- Be careful, we got the extremity linked by the switch,
       -- not the extremity in the same global direction than input.
       -- We need to get the opposite one.
       S_Extremity := Segment.Opposite_Extremity (S_Extremity);
-
-      if not Found then
-         raise No_Next_Segment;
-      end if;
    end Next;
 
    function Relative_Extremity (
@@ -119,14 +154,12 @@ package body Track is
       Cursor := Location;
       Cursor_Extremity := Location_Extremity;
       while Cursor /= Reference
+        and then This.Is_Linked (Cursor, Cursor_Extremity)
       loop
-         begin
-            This.Next (Cursor, Cursor_Extremity);
+         This.Next (Cursor, Cursor_Extremity);
 
-         exception
-            when Track.No_Next_Segment =>
-               exit;
-         end;
+         -- Exit in case of loop
+         exit when Cursor = Location;
       end loop;
 
       if Cursor = Reference
@@ -137,6 +170,7 @@ package body Track is
       Cursor := Location;
       Cursor_Extremity := Segment.Opposite_Extremity (Location_Extremity);
       while Cursor /= Reference
+        and then This.Is_Linked (Cursor, Cursor_Extremity)
       loop
          begin
             This.Next (Cursor, Cursor_Extremity);
@@ -163,17 +197,19 @@ package body Track is
       Cursor : Segment.Vectors.Cursor := S;
       Cursor_Extremity : Segment.Extremity := S_Extremity;
    begin
+      while This.Is_Linked (Cursor, Cursor_Extremity)
       loop
          This.Next (Cursor, Cursor_Extremity);
          exit when Cursor = S;
       end loop;
 
-      raise Unexpected_Loop;
-
-   exception
-      when No_Next_Segment =>
+      if This.Is_Linked (Cursor, Cursor_Extremity)
+      then
+         raise Unexpected_Loop;
+      else
          S := Cursor;
          S_Extremity := Cursor_Extremity;
+      end if;
    end End_Of_Route;
 
    -- From switch_operation child package

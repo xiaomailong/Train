@@ -44,6 +44,13 @@ package Track is
                     )
                     return Switch.Object;
 
+   function Is_Linked (
+                       This : in Object;
+                       S : in Segment.Vectors.Cursor;
+                       S_Extremity : in Segment.Extremity
+                      )
+                      return Boolean;
+
    procedure Next (
                    This : in Object;
                    S : in out Segment.Vectors.Cursor;
