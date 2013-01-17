@@ -119,8 +119,14 @@ package body Location.Oriented is
          raise Location_Are_Not_Comparable;
       end if;
 
-      return LowerThan (Current_Track,
-                        Non_Oriented (Left), Non_Oriented (Right));
+      case Left.Reference_Extremity is
+         when Segment.Incrementing =>
+            return LowerThan (Current_Track, Left.Reference,
+                              Non_Oriented (Left), Non_Oriented (Right));
+         when Segment.Decrementing =>
+            return LowerThan (Current_Track, Left.Reference,
+                              Non_Oriented (Right), Non_Oriented (Left));
+      end case;
    end LowerThan;
 
 
@@ -151,7 +157,16 @@ package body Location.Oriented is
                  Right : Types.Abscissa
                 )
                 return Object
-   is begin return Add (Current_Track, Left.Reference, Left, Right); end Add;
+   is
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      case Left.Reference_Extremity is
+         when Segment.Incrementing =>
+            return Add (Current_Track, Left.Reference, Left, Right);
+         when Segment.Decrementing =>
+            return Add (Current_Track, Left.Reference, Left, - Right);
+      end case;
+   end Add;
 
    function Minus (
                    Current_Track : Track.Object;
