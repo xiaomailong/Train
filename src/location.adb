@@ -183,9 +183,6 @@ package body Location is
          return False;
       end if;
 
-   exception
-      when No_Link_With_Segment =>
-         return False;
    end LowerThan;
 
    function LowerThan

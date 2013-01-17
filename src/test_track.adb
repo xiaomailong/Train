@@ -206,6 +206,16 @@ procedure Test_Track is
          raise Test_Fail;
       end if;
 
+      if Signal_1_S < Signal_2_N.Non_Oriented
+        and Signal_2_N.Non_Oriented < Signal_1_S
+        and Signal_2_N.Non_Oriented < Signal_1_S.Non_Oriented
+      then
+         -- Test OK
+         null;
+      else
+         raise Test_Fail;
+      end if;
+
       -- Error detection test
       begin
          if Signal_1_N < Signal_2_R
