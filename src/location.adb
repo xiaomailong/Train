@@ -147,15 +147,19 @@ package body Location is
                    in 0.0 ..
                    Segment.Vectors.Element (Result.Reference).Max_Abscissa)
       loop
-         Current_Track.Next (Cursor, Cursor_Extremity);
-
          if Result_Extremity = Segment.Incrementing then
             Result.Reference_Abscissa := Result.Abscissa
-              - Segment.Vectors.Element (Result.Reference).Max_Abscissa;
-         end if;
-         if Cursor_Extremity = Segment.Decrementing then
-            Result.Reference_Abscissa := Result.Abscissa
               - Segment.Vectors.Element (Cursor).Max_Abscissa;
+         end if;
+         if Result_Extremity = Segment.Decrementing then
+            Result.Reference_Abscissa := - Result.Abscissa;
+         end if;
+
+         Current_Track.Next (Cursor, Cursor_Extremity);
+
+         if Cursor_Extremity = Segment.Decrementing then
+            Result.Reference_Abscissa :=
+              Segment.Vectors.Element (Cursor).Max_Abscissa - Result.Abscissa;
          end if;
          Result.Reference_Segment := Cursor;
          Result_Extremity := Cursor_Extremity;

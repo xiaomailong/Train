@@ -207,7 +207,10 @@
    - L2 - L3 :: - ((/L2 - L1/) - (/L3 - L1/))                                \\
      la négation vient du référentiel de /L3/ sur lequel on fait le calcul
 
-** Test_Track::Circle_Line
+   Le  calcul d'égalité  d'un point  /L1p/ calculé  à partir  de /L2/  permet de
+   tester la normalisation des abscisse et les opérations d'égalité.
+
+** =Test_Track::Circle_Line=
 
    Voie circulaire avec une section double.
 

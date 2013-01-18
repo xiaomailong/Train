@@ -41,4 +41,9 @@ package body Location.Topo is
       return Minus (Current_Track.all, Left, Right);
    end "-";
 
+   function "abs" (X : Object'Class) return Object'Class is
+   begin
+      return X.Normalize (Current_Track.all);
+   end "abs";
+
 end Location.Topo;

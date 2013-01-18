@@ -30,14 +30,14 @@ procedure Test_Track is
    Test_Fail : exception;
 
    procedure Eyebrown is
-      Eyebrown_Shape : Track.Object := Track.Create;
+      Eyebrown_Shape : aliased Track.Object := Track.Create;
       Size : constant array (Positive range <>) of Types.Length
         := (1=>5.0, 2=>15.0, 3=>25.0, 4=>5.0);
 
       Main_Segment : Segment.Vectors.Cursor;
       Upstream_Switch, Downstream_Switch : Switch.Vectors.Cursor;
 
-      L1, L2, L3 : Location.Object;
+      L1, L1p, L2, L3 : Location.Object;
       Abscs : constant array (Positive range <>) of Types.Abscissa
         := (1=>1.0, 2=>3.0, 3=>10.0);
       -- Expected_Distances
@@ -46,6 +46,9 @@ procedure Test_Track is
       L1_L3 : constant := 19.0;
       -- Negation because High (L3) reverse the reference from L1 and L2
       L3_L2 : constant := - (L1_L2_By_High - L1_L3);
+
+      package Eyebrown_Topology is new Location.Topo (Eyebrown_Shape'access);
+      use Eyebrown_Topology;
 
       use type Types.Meter_Precision_Millimeter;
 
@@ -99,9 +102,28 @@ procedure Test_Track is
       -- by main
       Eyebrown_Shape.Set (Upstream_Switch, 1);
       Eyebrown_Shape.Set (Downstream_Switch, 1);
+
       if L2.Abscissa (Eyebrown_Shape, L1.Reference) - L1.Abscissa
         = L1_L2_By_Main
       then
+         -- Test OK
+         null;
+      else
+         raise Test_Fail;
+      end if;
+
+      -- Test location comparaison
+      L1p := Location.Object (L2 +
+                                (- L2.Abscissa
+                                   - Size(1) - Size(2)
+                                   + L1.Abscissa));
+      if L1 /= L2 then
+         -- Test OK
+         null;
+      else
+         raise Test_Fail;
+      end if;
+      if L1p = L1 then
          -- Test OK
          null;
       else

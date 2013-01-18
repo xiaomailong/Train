@@ -73,7 +73,13 @@ package body Zone is
             Cursor_Length :=
               Cursor_Length - Track.Element (Cursor).Max_Abscissa;
          end if;
+         if Cursor_Extremity = Segment.Incrementing
+         then
+            Cursor_Length := - Cursor_Length;
+         end if;
+
          Current_Track.Next (Cursor, Cursor_Extremity);
+
          if Cursor_Extremity = Segment.Decrementing
          then
             Cursor_Length :=

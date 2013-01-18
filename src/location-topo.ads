@@ -27,4 +27,6 @@ package Location.Topo is
 
    function "-" (Left, Right : Object'Class) return Types.Abscissa;
 
+   function "abs" (X : Object'Class) return Object'Class;
+
 end Location.Topo;
