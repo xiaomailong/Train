@@ -116,6 +116,13 @@ package body Location is
    -- Topologic functions
    -----------
 
+   function Normal (This : Object) return Boolean
+   is
+   begin
+      return This.Reference_Abscissa in
+        0.0 .. Track.Element (This.Reference_Segment).Max_Abscissa;
+   end Normal;
+
    function Normalize (This : Object; Current_Track : Track.Object)
                       return Object
    is
@@ -156,6 +163,42 @@ package body Location is
 
       return Result;
    end Normalize;
+
+   function Comparable (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean
+   is
+      Cursor : Segment.Vectors.Cursor;
+      Cursor_Extremity : Segment.Extremity;
+      use type Segment.Vectors.Cursor;
+   begin
+      Cursor := Left.Reference;
+      Cursor_Extremity := Segment.Incrementing;
+      while Cursor /= Right.Reference
+        and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
+      loop
+         Current_Track.Next (Cursor, Cursor_Extremity);
+
+         exit when Cursor = Left.Reference;
+      end loop;
+      if Cursor = Right.Reference
+      then
+         return True;
+      end if;
+      Cursor := Left.Reference;
+      Cursor_Extremity := Segment.Decrementing;
+      while Cursor /= Right.Reference
+        and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
+      loop
+         Current_Track.Next (Cursor, Cursor_Extremity);
+         exit when Cursor = Left.Reference;
+      end loop;
+      if Cursor = Right.Reference
+      then
+         return True;
+      end if;
+
+      return False;
+   end Comparable;
 
    function Equal
      (Current_Track : Track.Object;

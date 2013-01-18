@@ -36,7 +36,13 @@ package Zone is
    function Max (This : Object; Current_Track : Track.Object)
                 return Location.Oriented.Object;
 
+   function Constructible (This : Object; Current_Track : Track.Object)
+                          return Boolean;
+
    function Is_Not_Null (This : Object) return Boolean;
+
+   function Comparable (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean;
 
    function Inter (Current_Track : Track.Object; Left, Right : Object)
                   return Object;

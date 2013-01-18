@@ -88,6 +88,15 @@ package body Location.Oriented is
                     );
    end Normalize;
 
+   function Comparable (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean
+   is
+   begin
+      return Same_Extremity (Current_Track, Left, Right)
+        and then Comparable
+        (Current_Track, Left.Non_Oriented, Right.Non_Oriented);
+   end Comparable;
+
    function Same_Extremity (Current_Track : Track.Object; Left, Right : Object)
                            return Boolean
    is

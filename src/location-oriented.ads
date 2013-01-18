@@ -49,6 +49,9 @@ package Location.Oriented is
    function Normalize (This : Object; Current_Track : Track.Object)
                       return Object;
 
+   function Comparable (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean;
+
    function Same_Extremity (Current_Track : Track.Object; Left, Right : Object)
                            return Boolean;
 

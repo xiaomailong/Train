@@ -44,8 +44,13 @@ package Location is
 
    -- When no reference segment is given, first operand is choosen as reference
 
+   function Normal (This : Object) return Boolean;
+
    function Normalize (This : Object; Current_Track : Track.Object)
                       return Object;
+
+   function Comparable (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean;
 
    function Equal (Current_Track : Track.Object; Left, Right : Object)
                   return Boolean;
