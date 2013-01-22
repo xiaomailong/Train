@@ -1,0 +1,37 @@
+#+TITLE:     Calcul de la position d'un train
+#+AUTHOR:    Baptiste Fouques
+#+EMAIL:     bateast@bat.fr.eu.org
+#+LANGUAGE:  fr
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:{} -:t f:t *:t <:t
+
+* Localisation ponctuelle
+
+  - détection à la voie du passage d'un train
+  - détection à bord du passage au dessus d'une balise
+
+* Localisation pseudo continue
+
+  Les systèmes réels de contrôle de train utilisent et combinent des systèmes de
+  mesure du déplacement linéaire (curviligne dans le repère voie) en utilisant
+  - des  roues  codées  mesurant  la  rotation d'une  roue  et  transformant  ce
+    déplacement roue en un déplacement train
+  - des radars couplés calculant des vitesses continue du train
+  - des détection de mouvement au dessus d'un treillis électromagnétique
+  - un localisation /GPS/ donnant une position dans le référentiel géocentrique,
+    ramené au repère voie
+
+  Ces systèmes sont difficiles  à mettre en œuvre sur un  système réduit pour un
+  faible coût.
+
+** Localisation par /wiimote/
+
+  La /wiimote/ fournie en ~bluetooth~ les forces d'accélération (accéléromètre),
+  les positions  de boutons, et  la position  relative des 4  sources lumineuses
+  infrarouges visibles.
+
+  Ces données sont accessibles facilement :
+  - [[http://sourceforge.net/projects/libwiimote/][libwiimote]]
+
+  Les données  de la caméra  infra-rouge permet  ensuite de suivre  la /wiimote/
+  grâce à l'image d'une balise.
+  - [[http://idav.ucdavis.edu/~okreylos/ResDev/Wiimote/index.html][Wiimote 3D]]
