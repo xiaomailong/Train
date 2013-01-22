@@ -105,6 +105,24 @@ package body Zone is
         (Current_Track, Left.Start.Non_Oriented, Right.Start.Non_Oriented);
    end Comparable;
 
+   function Equal (Current_Track : Track.Object; Left, Right : Object)
+                       return Boolean
+   is
+   begin
+      return Comparable (Current_Track, Left, Right)
+        and then
+        (
+         (Location.Oriented.Equal (Current_Track, Left.Zero, Right.Zero)
+            and Location.Oriented.Equal
+            (Current_Track, Left.Max (Current_Track), Right.Max (Current_Track))
+         ) or
+           ( Location.Oriented.Equal
+               (Current_Track, Left.Zero, Right.Max (Current_Track))
+               and Location.Oriented.Equal
+               (Current_Track, Left.Max (Current_Track), Right.Zero)
+           ));
+   end Equal;
+
    function Inter (Current_Track : Track.Object; Left, Right : Object)
                   return Object
    is

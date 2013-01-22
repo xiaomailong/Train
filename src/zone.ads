@@ -44,6 +44,9 @@ package Zone is
    function Comparable (Current_Track : Track.Object; Left, Right : Object)
                        return Boolean;
 
+   function Equal (Current_Track : Track.Object; Left, Right : Object)
+                  return Boolean;
+
    function Inter (Current_Track : Track.Object; Left, Right : Object)
                   return Object;
 
