@@ -19,53 +19,48 @@ package body Location is
    function Create
      (Relative : Segment.Vectors.Cursor;
       Abscissa : Types.Abscissa)
-     return Object
+      return     Object
    is
    begin
-      return Object'(
-                     Reference_Segment => Relative,
-                     Reference_Abscissa => Abscissa
-                    );
+      return Object'
+        (Reference_Segment  => Relative,
+         Reference_Abscissa => Abscissa);
    end Create;
 
-   function Reference (This : Object)
-                      return Segment.Vectors.Cursor
-   is
+   function Reference (This : Object) return Segment.Vectors.Cursor is
    begin
       return This.Reference_Segment;
    end Reference;
 
-   function Abscissa (This : Object)
-                     return Types.Abscissa
-   is
+   function Abscissa (This : Object) return Types.Abscissa is
    begin
       return This.Reference_Abscissa;
    end Abscissa;
 
-   function Abscissa (
-                      This : Object;
-                      Dynamic_Track : Track.Object;
-                      Relative : in Segment.Vectors.Cursor
-                     )
-                     return Types.Abscissa
+   function Abscissa
+     (This          : Object;
+      Dynamic_Track : Track.Object;
+      Relative      : in Segment.Vectors.Cursor)
+      return          Types.Abscissa
    is
       use type Types.Meter_Precision_Millimeter;
       use type Segment.Vectors.Cursor;
 
-      Delta_Segment : Types.Length;
-      Cursor : Segment.Vectors.Cursor;
+      Delta_Segment    : Types.Length;
+      Cursor           : Segment.Vectors.Cursor;
       Cursor_Extremity : Segment.Extremity;
    begin
 
-      Delta_Segment := 0.0;
-      Cursor := This.Reference;
+      Delta_Segment    := 0.0;
+      Cursor           := This.Reference;
       Cursor_Extremity := Segment.Incrementing;
-  Incrementing_Loop :
-      while Cursor /= Relative
-        and then Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
+      Incrementing_Loop : while Cursor /= Relative
+        and then                Dynamic_Track.Is_Linked
+                                   (Cursor,
+                                    Cursor_Extremity)
       loop
-         Delta_Segment := Delta_Segment
-           + Segment.Vectors.Element (Cursor).Max_Abscissa;
+         Delta_Segment := Delta_Segment +
+                          Segment.Vectors.Element (Cursor).Max_Abscissa;
 
          Dynamic_Track.Next (Cursor, Cursor_Extremity);
 
@@ -77,32 +72,31 @@ package body Location is
       then
          case Cursor_Extremity is
             when Segment.Incrementing =>
-              return This.Abscissa - Delta_Segment;
+               return This.Abscissa - Delta_Segment;
             when Segment.Decrementing =>
-               return Segment.Vectors.Element (Cursor).Max_Abscissa
-                 - (This.Abscissa - Delta_Segment);
+               return Segment.Vectors.Element (Cursor).Max_Abscissa -
+                      (This.Abscissa - Delta_Segment);
          end case;
       end if;
 
-      Delta_Segment := 0.0;
-      Cursor := This.Reference;
+      Delta_Segment    := 0.0;
+      Cursor           := This.Reference;
       Cursor_Extremity := Segment.Decrementing;
       while Cursor /= Relative
         and then Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
-            Dynamic_Track.Next (Cursor, Cursor_Extremity);
-            Delta_Segment := Delta_Segment
-              + Segment.Vectors.Element (Cursor).Max_Abscissa;
+         Dynamic_Track.Next (Cursor, Cursor_Extremity);
+         Delta_Segment := Delta_Segment +
+                          Segment.Vectors.Element (Cursor).Max_Abscissa;
       end loop;
 
       if Cursor = Relative
       then
          case Cursor_Extremity is
             when Segment.Incrementing =>
-               return
-                 - (Delta_Segment
-                      - Segment.Vectors.Element (Cursor).Max_Abscissa
-                      + This.Abscissa);
+               return -(Delta_Segment -
+                        Segment.Vectors.Element (Cursor).Max_Abscissa +
+                        This.Abscissa);
             when Segment.Decrementing =>
                return Delta_Segment + This.Abscissa;
          end case;
@@ -116,66 +110,73 @@ package body Location is
    -- Topologic functions
    -----------
 
-   function Normal (This : Object) return Boolean
-   is
+   function Normal (This : Object) return Boolean is
    begin
       return This.Reference_Abscissa in
-        0.0 .. Track.Element (This.Reference_Segment).Max_Abscissa;
+         0.0 .. Track.Element (This.Reference_Segment).Max_Abscissa;
    end Normal;
 
-   function Normalize (This : Object; Current_Track : Track.Object)
-                      return Object
+   function Normalize
+     (This          : Object;
+      Current_Track : Track.Object)
+      return          Object
    is
-      Cursor : Segment.Vectors.Cursor;
+      Cursor           : Segment.Vectors.Cursor;
       Cursor_Extremity : Segment.Extremity;
 
-      Result : Object := This;
+      Result           : Object := This;
       Result_Extremity : Segment.Extremity;
 
       use type Types.Meter_Precision_Millimeter;
       use type Segment.Extremity;
    begin
-      if This.Abscissa >= 0.0 then
+      if This.Abscissa >= 0.0
+      then
          Result_Extremity := Segment.Incrementing;
       else
          Result_Extremity := Segment.Decrementing;
       end if;
-      Cursor := Result.Reference;
+      Cursor           := Result.Reference;
       Cursor_Extremity := Result_Extremity;
 
-      while not (Result.Abscissa
-                   in 0.0 ..
-                   Segment.Vectors.Element (Result.Reference).Max_Abscissa)
+      while not (Result.Abscissa in
+            0.0 .. Segment.Vectors.Element (Result.Reference).Max_Abscissa)
       loop
-         if Result_Extremity = Segment.Incrementing then
-            Result.Reference_Abscissa := Result.Abscissa
-              - Segment.Vectors.Element (Cursor).Max_Abscissa;
+         if Result_Extremity = Segment.Incrementing
+         then
+            Result.Reference_Abscissa := Result.Abscissa -
+                                         Segment.Vectors.Element (Cursor).
+              Max_Abscissa;
          end if;
-         if Result_Extremity = Segment.Decrementing then
-            Result.Reference_Abscissa := - Result.Abscissa;
+         if Result_Extremity = Segment.Decrementing
+         then
+            Result.Reference_Abscissa := -Result.Abscissa;
          end if;
 
          Current_Track.Next (Cursor, Cursor_Extremity);
 
-         if Cursor_Extremity = Segment.Decrementing then
+         if Cursor_Extremity = Segment.Decrementing
+         then
             Result.Reference_Abscissa :=
               Segment.Vectors.Element (Cursor).Max_Abscissa - Result.Abscissa;
          end if;
          Result.Reference_Segment := Cursor;
-         Result_Extremity := Cursor_Extremity;
+         Result_Extremity         := Cursor_Extremity;
       end loop;
 
       return Result;
    end Normalize;
 
-   function Comparable (Current_Track : Track.Object; Left, Right : Object)
-                       return Boolean
+   function Comparable
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Boolean
    is
-      Cursor : Segment.Vectors.Cursor;
+      Cursor           : Segment.Vectors.Cursor;
       Cursor_Extremity : Segment.Extremity;
       use type Segment.Vectors.Cursor;
    begin
-      Cursor := Left.Reference;
+      Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Incrementing;
       while Cursor /= Right.Reference
         and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
@@ -188,7 +189,7 @@ package body Location is
       then
          return True;
       end if;
-      Cursor := Left.Reference;
+      Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Decrementing;
       while Cursor /= Right.Reference
         and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
@@ -206,13 +207,13 @@ package body Location is
 
    function Equal
      (Current_Track : Track.Object;
-      Left, Right : Object)
-     return Boolean
+      Left, Right   : Object)
+      return          Boolean
    is
       use type Types.Meter_Precision_Millimeter;
    begin
-      if Left.Abscissa - Right.Abscissa(Current_Track, Left.Reference)
-        in -Constants.Millimeter .. Constants.Millimeter
+      if Left.Abscissa - Right.Abscissa (Current_Track, Left.Reference) in
+            -Constants.Millimeter .. Constants.Millimeter
       then
          return True;
       else
@@ -226,19 +227,19 @@ package body Location is
 
    function LowerThan
      (Current_Track : Track.Object;
-      Reference : Segment.Vectors.Cursor;
-      Left, Right : Object)
-      return Boolean
+      Reference     : Segment.Vectors.Cursor;
+      Left, Right   : Object)
+      return          Boolean
    is
-      Cursor : Segment.Vectors.Cursor := Left.Reference;
-      Cursor_Extremity : Segment.Extremity := Segment.Incrementing;
+      Cursor           : Segment.Vectors.Cursor := Left.Reference;
+      Cursor_Extremity : Segment.Extremity      := Segment.Incrementing;
       use type Types.Meter_Precision_Millimeter;
    begin
       -- Raise exception if there is a loop
       Current_Track.End_Of_Route (Cursor, Cursor_Extremity);
 
-      if Left.Abscissa (Current_Track, Reference)
-        < Right.Abscissa (Current_Track, Reference)
+      if Left.Abscissa (Current_Track, Reference) <
+         Right.Abscissa (Current_Track, Reference)
       then
          return True;
       else
@@ -249,38 +250,35 @@ package body Location is
 
    function LowerThan
      (Current_Track : Track.Object;
-      Left, Right : Object)
-      return Boolean
+      Left, Right   : Object)
+      return          Boolean
    is
    begin
-      return Lowerthan (Current_Track, Left.Reference, Left, Right);
+      return LowerThan (Current_Track, Left.Reference, Left, Right);
    end LowerThan;
 
    function Add
-     (
-      Current_Track : Track.Object;
-      Reference : Segment.Vectors.Cursor;
-      Left : Object;
-      Right : Types.Abscissa
-     )
-     return Object
+     (Current_Track : Track.Object;
+      Reference     : Segment.Vectors.Cursor;
+      Left          : Object;
+      Right         : Types.Abscissa)
+      return          Object
    is
       Result : Object;
       use type Types.Meter_Precision_Millimeter;
    begin
-      Result := (
-                 Reference_Abscissa =>
-                   Left.Abscissa (Current_Track, Reference) + Right,
-                 Reference_Segment => Reference
-                );
+      Result :=
+        (Reference_Abscissa => Left.Abscissa (Current_Track, Reference) +
+                               Right,
+         Reference_Segment  => Reference);
       return Result.Normalize (Current_Track);
    end Add;
 
    function Add
      (Current_Track : Track.Object;
-      Left : Object;
-      Right : Types.Abscissa)
-      return Object
+      Left          : Object;
+      Right         : Types.Abscissa)
+      return          Object
    is
    begin
       return Add (Current_Track, Left.Reference, Left, Right);
@@ -288,8 +286,8 @@ package body Location is
 
    function Minus
      (Current_Track : Track.Object;
-      Left, Right : Object)
-      return Types.Abscissa
+      Left, Right   : Object)
+      return          Types.Abscissa
    is
       use type Types.Meter_Precision_Millimeter;
    begin

@@ -16,5 +16,9 @@ project Train is
       for Default_Switches ("ada") use ("-g");
    end Binder;
 
+   package Pretty_Printer is
+      for Default_Switches ("ada") use ("--no-separate-is", "--separate-loop-then", "-M80");
+   end Pretty_Printer;
+
 end Train;
 

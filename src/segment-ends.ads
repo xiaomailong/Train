@@ -18,7 +18,9 @@ with Location.Oriented;
 
 package Segment.Ends is
 
-   function Zero (S : Segment.Vectors.Cursor) return Location.Oriented.Object;
+   function Zero
+     (S    : Segment.Vectors.Cursor)
+      return Location.Oriented.Object;
    function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object;
 
 end Segment.Ends;

@@ -21,41 +21,48 @@ package Zone is
 
    type Object is tagged private;
 
-   function Create (
-                    Start : Location.Oriented.Object;
-                    Length : Types.Length
-                   )
-                   return Object;
+   function Create
+     (Start  : Location.Oriented.Object;
+      Length : Types.Length)
+      return   Object;
 
    -- Be carefull, Zero is not Start :
    --  Zero and Max are oriented to the outside
    --  while Start describe an orientation to apply Length,
    --  then Start is toward the inside
-   function Zero (This : Object)
-                 return Location.Oriented.Object;
-   function Max (This : Object; Current_Track : Track.Object)
-                return Location.Oriented.Object;
+   function Zero (This : Object) return Location.Oriented.Object;
+   function Max
+     (This          : Object;
+      Current_Track : Track.Object)
+      return          Location.Oriented.Object;
 
-   function Constructible (This : Object; Current_Track : Track.Object)
-                          return Boolean;
+   function Constructible
+     (This          : Object;
+      Current_Track : Track.Object)
+      return          Boolean;
 
    function Is_Not_Null (This : Object) return Boolean;
 
-   function Comparable (Current_Track : Track.Object; Left, Right : Object)
-                       return Boolean;
+   function Comparable
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Boolean;
 
-   function Equal (Current_Track : Track.Object; Left, Right : Object)
-                  return Boolean;
+   function Equal
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Boolean;
 
-   function Inter (Current_Track : Track.Object; Left, Right : Object)
-                  return Object;
+   function Inter
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Object;
 
 private
 
-   type Object is tagged
-      record
-         Start : Location.Oriented.Object;
-         Length : Types.Length;
-      end record;
+   type Object is tagged record
+      Start  : Location.Oriented.Object;
+      Length : Types.Length;
+   end record;
 
 end Zone;

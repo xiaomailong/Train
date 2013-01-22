@@ -20,115 +20,127 @@ with Segment.Vectors;
 package body Zone is
 
    function Create
-     (Start : Location.Oriented.Object;
+     (Start  : Location.Oriented.Object;
       Length : Types.Length)
-      return Object
+      return   Object
    is
    begin
-      return Object'(
-                     Start => Start,
-                     Length => Length
-                    );
+      return Object'(Start => Start, Length => Length);
    end Create;
 
-   function Zero (This : Object)
-                 return Location.Oriented.Object
-   is
+   function Zero (This : Object) return Location.Oriented.Object is
    begin
       return Location.Oriented.Create
-        ( This.Start.Non_Oriented,
-          Segment.Opposite_Extremity (This.Start.Extremity)
-        );
+               (This.Start.Non_Oriented,
+                Segment.Opposite_Extremity (This.Start.Extremity));
    end Zero;
 
-   function Max (This : Object; Current_Track : Track.Object)
-                return Location.Oriented.Object
+   function Max
+     (This          : Object;
+      Current_Track : Track.Object)
+      return          Location.Oriented.Object
    is
    begin
-      return Location.Oriented.Add
-        (Current_Track, This.Start, This.Length);
+      return Location.Oriented.Add (Current_Track, This.Start, This.Length);
    end Max;
 
-   function Constructible (This : Object; Current_Track : Track.Object)
-                          return Boolean
+   function Constructible
+     (This          : Object;
+      Current_Track : Track.Object)
+      return          Boolean
    is
-      Cursor : Segment.Vectors.Cursor;
-      Cursor_Length : Types.Abscissa;
+      Cursor           : Segment.Vectors.Cursor;
+      Cursor_Length    : Types.Abscissa;
       Cursor_Extremity : Segment.Extremity;
       use type Types.Meter_Precision_Millimeter;
       use type Segment.Extremity;
    begin
-      if not (This.Length > Constants.Millimeter) then
+      if not (This.Length > Constants.Millimeter)
+      then
          return False;
       end if;
 
-      Cursor := This.Start.Reference;
-      Cursor_Length :=   This.Start.Abscissa + This.Length;
+      Cursor           := This.Start.Reference;
+      Cursor_Length    := This.Start.Abscissa + This.Length;
       Cursor_Extremity := This.Start.Extremity;
       while not Location.Create (Cursor, Cursor_Length).Normal
         and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
          if Cursor_Extremity = Segment.Incrementing
          then
-            Cursor_Length :=
-              Cursor_Length - Track.Element (Cursor).Max_Abscissa;
+            Cursor_Length := Cursor_Length -
+                             Track.Element (Cursor).Max_Abscissa;
          end if;
          if Cursor_Extremity = Segment.Incrementing
          then
-            Cursor_Length := - Cursor_Length;
+            Cursor_Length := -Cursor_Length;
          end if;
 
          Current_Track.Next (Cursor, Cursor_Extremity);
 
          if Cursor_Extremity = Segment.Decrementing
          then
-            Cursor_Length :=
-              Track.Element (Cursor).Max_Abscissa - Cursor_Length;
+            Cursor_Length := Track.Element (Cursor).Max_Abscissa -
+                             Cursor_Length;
          end if;
       end loop;
 
       return Location.Create (Cursor, Cursor_Length).Normal;
    end Constructible;
 
-   function Is_Not_Null (This : Object) return Boolean
-   is
+   function Is_Not_Null (This : Object) return Boolean is
       use type Types.Meter_Precision_Millimeter;
-   begin return This.Length > Constants.Millimeter; end Is_Not_Null;
+   begin
+      return This.Length > Constants.Millimeter;
+   end Is_Not_Null;
 
-   function Comparable (Current_Track : Track.Object; Left, Right : Object)
-                       return Boolean
+   function Comparable
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Boolean
    is
    begin
-      return Left.Constructible (Current_Track)
-        and Right.Constructible (Current_Track)
-        and Location.Comparable
-        (Current_Track, Left.Start.Non_Oriented, Right.Start.Non_Oriented);
+      return Left.Constructible (Current_Track) and
+             Right.Constructible (Current_Track) and
+             Location.Comparable
+                (Current_Track,
+                 Left.Start.Non_Oriented,
+                 Right.Start.Non_Oriented);
    end Comparable;
 
-   function Equal (Current_Track : Track.Object; Left, Right : Object)
-                       return Boolean
+   function Equal
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Boolean
    is
    begin
       return Comparable (Current_Track, Left, Right)
-        and then
-        (
-         (Location.Oriented.Equal (Current_Track, Left.Zero, Right.Zero)
-            and Location.Oriented.Equal
-            (Current_Track, Left.Max (Current_Track), Right.Max (Current_Track))
-         ) or
-           ( Location.Oriented.Equal
-               (Current_Track, Left.Zero, Right.Max (Current_Track))
-               and Location.Oriented.Equal
-               (Current_Track, Left.Max (Current_Track), Right.Zero)
-           ));
+            and then ((Location.Oriented.Equal
+                          (Current_Track,
+                           Left.Zero,
+                           Right.Zero) and
+                       Location.Oriented.Equal
+                          (Current_Track,
+                           Left.Max (Current_Track),
+                           Right.Max (Current_Track))) or
+                      (Location.Oriented.Equal
+                          (Current_Track,
+                           Left.Zero,
+                           Right.Max (Current_Track)) and
+                       Location.Oriented.Equal
+                          (Current_Track,
+                           Left.Max (Current_Track),
+                           Right.Zero)));
    end Equal;
 
-   function Inter (Current_Track : Track.Object; Left, Right : Object)
-                  return Object
+   function Inter
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Object
    is
       A1, B1, A2, B2, I, J : Location.Object;
-      Start : Location.Oriented.Object;
-      Length : Types.Meter_Precision_Millimeter;
+      Start                : Location.Oriented.Object;
+      Length               : Types.Meter_Precision_Millimeter;
    begin
 
       A1 := Left.Zero.Non_Oriented;
@@ -139,26 +151,28 @@ package body Zone is
       declare
          Swap : Location.Object;
       begin
-         if not Location.Lowerthan (Current_Track, A1.Reference, A1, B1) then
+         if not Location.LowerThan (Current_Track, A1.Reference, A1, B1)
+         then
             Swap := A1;
-            A1 := B1;
-            B1 := Swap;
+            A1   := B1;
+            B1   := Swap;
          end if;
-         if not Location.Lowerthan (Current_Track, A1.Reference, A2, B2) then
+         if not Location.LowerThan (Current_Track, A1.Reference, A2, B2)
+         then
             Swap := A2;
-            A2 := B2;
-            B2 := Swap;
+            A2   := B2;
+            B2   := Swap;
          end if;
       end;
 
       -- left equiv [A1;B1], right equiv [A2;B2] relative to A1.Reference
-      if Location.Lowerthan (Current_Track, A1.Reference, A1, A2)
+      if Location.LowerThan (Current_Track, A1.Reference, A1, A2)
       then
          I := A2;
       else
          I := A1;
       end if;
-      if Location.Lowerthan (Current_Track, A1.Reference, B1, B2)
+      if Location.LowerThan (Current_Track, A1.Reference, B1, B2)
       then
          J := B1;
       else
@@ -166,9 +180,13 @@ package body Zone is
       end if;
 
       Length := Location.Minus (Current_Track, J, I);
-      Start := Location.Oriented.Create
-        (I, Current_Track.Relative_Extremity
-           (I.Reference, A1.Reference, Segment.Incrementing));
+      Start  :=
+         Location.Oriented.Create
+           (I,
+            Current_Track.Relative_Extremity
+               (I.Reference,
+                A1.Reference,
+                Segment.Incrementing));
 
       return Create (Start, Length);
 

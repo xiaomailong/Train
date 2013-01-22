@@ -17,16 +17,20 @@ with Track;
 
 package body Segment.Ends is
 
-   function Zero (S : Segment.Vectors.Cursor) return Location.Oriented.Object is
+   function Zero
+     (S    : Segment.Vectors.Cursor)
+      return Location.Oriented.Object
+   is
    begin
       return Location.Oriented.Create (S, 0.0, Decrementing);
    end Zero;
 
    function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object is
    begin
-      return Location.Oriented.Create (S,
-                                       Track.Element(S).Max_Abscissa,
-                                       Incrementing);
+      return Location.Oriented.Create
+               (S,
+                Track.Element (S).Max_Abscissa,
+                Incrementing);
    end Max;
 
 end Segment.Ends;
