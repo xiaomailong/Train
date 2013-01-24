@@ -45,6 +45,11 @@
         et s'exprime  comme une extrémité de  segment. /Incrementing/ représente
         donc l'orientation  du segment et /Decrementing/  défini une orientation
         opposée à celle du segment.
+   - Zone  ::   ensemble  contiguë d'endroit sur la  voie dynamique, s'exprimant
+                comme une location orienté et une distance.  L'orientation de la
+                location ne  sert que  à construire la  zone, la  zone elle-même
+                n'est  pas  orientée.  La  zone suit  le  chemin  dynamique  des
+                aiguilles.
    - Switch :: une /aiguille/, un élément permettant de passer d'un segment à un
                autre suivant la position courante de l'aiguille.
      - une aiguille possède un nombre arbitraire de positions
@@ -146,9 +151,11 @@
 
    /L1 < L2 and L2.Non_Oriented < L1.Non_Oriented/
 
-   - Equal, "=" ::  pour deux points, même abscisse  et orientation relativement
-                   au même segment de référence.
-     - symétrique, transitif, réflexive
+   - Comparable :: indique si deux éléments sont sur le même chemin dynamique
+   - Constructible   ::    pour  une  zone,  s'il  existe  un  chemin  dynamique
+        suffisamment long pour construire la zone
+   - Equal,  "="  ::   pour  deux éléments,  même  localisation  et  orientation
+                    relativement au même segment de référence.
    - Lowerthan,  "<"  ::   pour deux points, relation d'ordre  sur les abscisses
         relativement à  l'orientation de  l'opérande de  gauche (de  son segment
         s'il n'est pas orienté).
@@ -163,7 +170,9 @@
      - l'opération /point - abs/ est la conjonction /point + \sdot - abs/
    - Minus, "-" ::  pour deux points,  retourne la différence d'abscisse (sur le
                     même   segment)  entre   les   de   points  relativement   à
-                    l'orientation du premier opérande
+                    l'orientation de référence
+   - Inter :: pour  deux zones, la zone correspondant à  l'intersection des deux
+              zones
 
 * Tests
 
@@ -263,3 +272,36 @@
    On vérifie le calcul des distances orientés entre deux points :
    - S_2_S - S_1_N = |L2|
    - S_1_N - S_2_S = |L1|
+** =Test_Track::Station_Line=
+   Une voie  double et  une station  avec une aiguille  de type  retournement en
+   avant gare. Les voies ont une orientation opposées.
+
+   La  station est  décrite  sur  chacune des  voies,  suivant des  orientations
+   relative opposées, donc  une orientation absolue égale. On  définit des zones
+   de protections  qui recouvre la station  et anticipe la station  sur quelques
+   mètres.
+
+   #+BEGIN_SRC ditaa :file img/station_line.png
+            <-----------------=-(10)--+
+                           +-(5)-=--->|
+                           |          |
+     <----------------*<----------------------------------
+              8       ^  1
+                      |    +=---------+
+                    10|    |          |
+                /-----/    +---------=+
+          5     |      4
+     ---------->*----------+----------------------------->
+                           |          |
+                           +-(5)-=--->|
+            <-----------------=-(10)--+
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:img/station_line.png]]
+
+   On  construit les  zones  de  protection attendues  restreinte  à chacun  des
+   segments, suivant la position des aiguilles.
+
+   On vérifie  que l'intersection  des zones de  protections avec  les segments,
+   suivant la position des aiguilles, correspond à ce qui était attendu.
