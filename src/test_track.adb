@@ -24,6 +24,7 @@ with Switch.Vectors;
 with Location;
 with Location.Oriented;
 with Location.Topo;
+with Zone;
 
 procedure Test_Track is
 
@@ -334,10 +335,177 @@ constant array (Positive range <>) of Types.Length :=
 
    end Circle;
 
+   procedure Station is
+      Station_Line : aliased Track.Object := Track.Create;
+      package Topo is new Location.Topo (Station_Line'Access);
+      use Topo;
+
+      Down                   :
+        array (Positive range 1 .. 3) of Segment.Vectors.Cursor;
+      Down_Size              : constant
+        array (Positive range <>) of Types.Meter_Precision_Millimeter    :=
+        (1 => 5.0,
+         2 => 20.0);
+      Up                     :
+        array (Positive range 1 .. 3) of Segment.Vectors.Cursor;
+      Up_Size                : constant
+        array (Positive range <>) of Types.Meter_Precision_Millimeter    :=
+        (1 => 8.0,
+         2 => 17.0);
+      Inter                  : Segment.Vectors.Cursor;
+      Inter_Size             : constant Types.Meter_Precision_Millimeter :=
+         10.0;
+      Down_Switch, Up_Switch : Switch.Vectors.Cursor;
+
+      Station_Up, Station_Down                       : Zone.Object;
+      Up_Station_Absc                                : constant
+        Types.Meter_Precision_Millimeter := 1.0;
+      Down_Station_Absc                              : constant
+        Types.Meter_Precision_Millimeter := 4.0;
+      Station_Length                                 : constant
+        Types.Meter_Precision_Millimeter := 10.0;
+      Station_Protection_Down, Station_Protection_Up : Zone.Object;
+      Station_Anticipation                           : constant
+        Types.Meter_Precision_Millimeter := 5.0;
+
+      use type Types.Meter_Precision_Millimeter;
+   begin
+
+      -- construct track
+      for I in Down'Range
+      loop
+         Station_Line.Add_Unlinked_Segment
+           (Segment.Create (Down_Size (I)),
+            Down (I));
+      end loop;
+      for I in Up'Range
+      loop
+         Station_Line.Add_Unlinked_Segment
+           (Segment.Create (Up_Size (I)),
+            Up (I));
+      end loop;
+      Station_Line.Add_Unlinked_Segment (Segment.Create (Inter_Size), Inter);
+      Station_Line.Add_Switch (Switch.Create, Down_Switch);
+      Station_Line.Add_Switch (Switch.Create, Up_Switch);
+      Station_Line.Add_Link
+        (S1            => Down (1),
+         S1_Extremity  => Segment.Incrementing,
+         Link_Switch   => Down_Switch,
+         Link_Position => 1,
+         S2            => Down (2),
+         S2_Extremity  => Segment.Decrementing);
+      Station_Line.Add_Link
+        (S1            => Down (1),
+         S1_Extremity  => Segment.Incrementing,
+         Link_Switch   => Down_Switch,
+         Link_Position => 2,
+         S2            => Inter,
+         S2_Extremity  => Segment.Decrementing);
+      Station_Line.Add_Link
+        (S1            => Up (2),
+         S1_Extremity  => Segment.Incrementing,
+         Link_Switch   => Up_Switch,
+         Link_Position => 1,
+         S2            => Up (1),
+         S2_Extremity  => Segment.Decrementing);
+      Station_Line.Add_Link
+        (S1            => Up (2),
+         S1_Extremity  => Segment.Incrementing,
+         Link_Switch   => Up_Switch,
+         Link_Position => 2,
+         S2            => Inter,
+         S2_Extremity  => Segment.Incrementing);
+
+      -- Define Station
+      Station_Down :=
+         Zone.Create
+           (Location.Oriented.Object (Segment.Ends.Zero (Down (2)).Opposite +
+                                      Down_Station_Absc),
+            Station_Length);
+
+      Station_Up :=
+         Zone.Create
+           (Location.Oriented.Object (Segment.Ends.Max (Up (2)).Opposite +
+                                      Up_Station_Absc),
+            Station_Length);
+      -- Define Protection, covering station + anticipation
+      Station_Protection_Down :=
+         Zone.Create
+           (Station_Down.Max (Station_Line).Opposite,
+            Station_Length + Station_Anticipation);
+      Station_Protection_Up   :=
+         Zone.Create
+           (Station_Up.Max (Station_Line).Opposite,
+            Station_Length + Station_Anticipation);
+
+      declare
+         Up_N, Up_Inter, Down_S : Zone.Object;
+      begin
+         Up_N     :=
+            Zone.Create
+              (Segment.Ends.Zero (Up (1)).Opposite,
+               Station_Anticipation - Up_Station_Absc);
+         Up_Inter :=
+            Zone.Create
+              (Segment.Ends.Max (Inter).Opposite,
+               Station_Anticipation - Up_Station_Absc);
+         Down_S   :=
+            Zone.Create
+              (Segment.Ends.Max (Down (1)).Opposite,
+               Station_Anticipation - Down_Station_Absc);
+
+         Station_Line.Set (Down_Switch, 1);
+         Station_Line.Set (Up_Switch, 1);
+         if Zone.Equal
+              (Station_Line,
+               Down_S,
+               Zone.Inter
+                  (Station_Line,
+                   Station_Protection_Down,
+                   Zone.From_Segment (Down (1))))
+         then
+            -- test OK
+            null;
+         else
+            raise Test_Fail;
+         end if;
+         if Zone.Equal
+              (Station_Line,
+               Up_N,
+               Zone.Inter
+                  (Station_Line,
+                   Station_Protection_Up,
+                   Zone.From_Segment (Up (1))))
+         then
+            -- test OK
+            null;
+         else
+            raise Test_Fail;
+         end if;
+         Station_Line.Set (Up_Switch, 2);
+         if Zone.Equal
+              (Station_Line,
+               Up_Inter,
+               Zone.Inter
+                  (Station_Line,
+                   Station_Protection_Up,
+                   Zone.From_Segment (Inter)))
+         then
+            -- test OK
+            null;
+         else
+            raise Test_Fail;
+         end if;
+      end;
+
+   end Station;
+
 begin
 
    Eyebrown;
 
    Circle;
+
+   Station;
 
 end Test_Track;

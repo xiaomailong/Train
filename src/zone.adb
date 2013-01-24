@@ -15,7 +15,7 @@
 
 with Constants;
 with Segment;
-with Segment.Vectors;
+with Segment.Ends;
 
 package body Zone is
 
@@ -27,6 +27,13 @@ package body Zone is
    begin
       return Object'(Start => Start, Length => Length);
    end Create;
+
+   function From_Segment (S : Segment.Vectors.Cursor) return Object is
+   begin
+      return Create
+               (Segment.Ends.Zero (S).Opposite,
+                Track.Element (S).Max_Abscissa);
+   end From_Segment;
 
    function Zero (This : Object) return Location.Oriented.Object is
    begin
@@ -61,8 +68,13 @@ package body Zone is
       end if;
 
       Cursor           := This.Start.Reference;
-      Cursor_Length    := This.Start.Abscissa + This.Length;
       Cursor_Extremity := This.Start.Extremity;
+      case Cursor_Extremity is
+         when Segment.Incrementing =>
+            Cursor_Length := This.Start.Abscissa + This.Length;
+         when Segment.Decrementing =>
+            Cursor_Length := This.Start.Abscissa - This.Length;
+      end case;
       while not Location.Create (Cursor, Cursor_Length).Normal
         and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
@@ -179,7 +191,7 @@ package body Zone is
          J := B2;
       end if;
 
-      Length := Location.Minus (Current_Track, J, I);
+      Length := Location.Minus (Current_Track, A1.Reference, J, I);
       Start  :=
          Location.Oriented.Create
            (I,

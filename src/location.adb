@@ -286,12 +286,24 @@ package body Location is
 
    function Minus
      (Current_Track : Track.Object;
+      Reference     : Segment.Vectors.Cursor;
       Left, Right   : Object)
       return          Types.Abscissa
    is
       use type Types.Meter_Precision_Millimeter;
    begin
-      return Left.Abscissa - Right.Abscissa (Current_Track, Left.Reference);
+      return Left.Abscissa (Current_Track, Reference) -
+             Right.Abscissa (Current_Track, Reference);
+   end Minus;
+
+   function Minus
+     (Current_Track : Track.Object;
+      Left, Right   : Object)
+      return          Types.Abscissa
+   is
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      return Minus (Current_Track, Left.Reference, Left, Right);
    end Minus;
 
 end Location;

@@ -49,6 +49,13 @@ package body Location.Oriented is
       return Create (Relative, Abscissa, Segment.Incrementing);
    end Create;
 
+   function Opposite (This : Location.Oriented.Object) return Object is
+   begin
+      return Create
+               (This.Non_Oriented,
+                Segment.Opposite_Extremity (This.Reference_Extremity));
+   end Opposite;
+
    function Extremity (This : Object) return Segment.Extremity is
    begin
       return This.Reference_Extremity;

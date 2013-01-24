@@ -34,6 +34,8 @@ package Location.Oriented is
       Extremity : Segment.Extremity := Segment.Incrementing)
       return      Object;
 
+   function Opposite (This : Location.Oriented.Object) return Object;
+
    function Extremity (This : Object) return Segment.Extremity;
    function Extremity
      (This          : Object;

@@ -16,6 +16,7 @@
 with Types;
 with Track;
 with Location.Oriented;
+with Segment.Vectors;
 
 package Zone is
 
@@ -25,6 +26,8 @@ package Zone is
      (Start  : Location.Oriented.Object;
       Length : Types.Length)
       return   Object;
+
+   function From_Segment (S : Segment.Vectors.Cursor) return Object;
 
    -- Be carefull, Zero is not Start :
    --  Zero and Max are oriented to the outside

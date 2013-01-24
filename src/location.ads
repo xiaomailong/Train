@@ -86,6 +86,12 @@ package Location is
       Left, Right   : Object)
       return          Types.Abscissa;
 
+   function Minus
+     (Current_Track : Track.Object;
+      Reference     : Segment.Vectors.Cursor;
+      Left, Right   : Object)
+      return          Types.Abscissa;
+
    -- Exceptions
 
    No_Link_With_Segment : exception;
