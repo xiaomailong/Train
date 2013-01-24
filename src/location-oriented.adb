@@ -62,13 +62,12 @@ package body Location.Oriented is
    end Extremity;
 
    function Extremity
-     (This          : Object;
-      Dynamic_Track : Track.Object;
-      Relative      : in Segment.Vectors.Cursor)
-      return          Segment.Extremity
+     (This     : Object;
+      Relative : in Segment.Vectors.Cursor)
+      return     Segment.Extremity
    is
    begin
-      return Dynamic_Track.Relative_Extremity
+      return Current_Track.Relative_Extremity
                (Relative,
                 This.Reference,
                 This.Extremity);
@@ -88,8 +87,8 @@ package body Location.Oriented is
 
    function Comparable (Left, Right : Object) return Boolean is
    begin
-      return Same_Extremity (Left, Right)
-            and then Comparable (Left.Non_Oriented, Right.Non_Oriented);
+      return Same_Extremity (Left, Right) and
+             Comparable (Left.Non_Oriented, Right.Non_Oriented);
    end Comparable;
 
    function Same_Extremity (Left, Right : Object) return Boolean is
@@ -104,7 +103,7 @@ package body Location.Oriented is
 
    function Equal (Left, Right : Object) return Boolean is
    begin
-      return Equal (Non_Oriented (Left), Non_Oriented (Right)) and
+      return Non_Oriented (Left) = Non_Oriented (Right) and
              Same_Extremity (Left, Right);
    end Equal;
 
@@ -171,14 +170,29 @@ package body Location.Oriented is
       end case;
    end Add;
 
-   function Minus (Left, Right : Object) return Types.Abscissa is
+   function Minus
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Types.Abscissa
+   is
+      use type Segment.Extremity;
    begin
       if not Same_Extremity (Left, Right)
       then
          raise Location_Are_Not_Comparable;
       end if;
 
-      return Minus (Non_Oriented (Left), Non_Oriented (Right));
+      case Left.Extremity (Reference) is
+         when Segment.Incrementing =>
+            return Non_Oriented (Left) - Non_Oriented (Right);
+         when Segment.Decrementing =>
+            return Non_Oriented (Right) - Non_Oriented (Left);
+      end case;
+   end Minus;
+
+   function Minus (Left, Right : Object) return Types.Abscissa is
+   begin
+      return Minus (Left.Reference, Left, Right);
    end Minus;
 
 end Location.Oriented;

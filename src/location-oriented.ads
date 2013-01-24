@@ -40,10 +40,9 @@ package Location.Oriented is
 
    function Extremity (This : Object) return Segment.Extremity;
    function Extremity
-     (This          : Object;
-      Dynamic_Track : Track.Object;
-      Relative      : in Segment.Vectors.Cursor)
-      return          Segment.Extremity;
+     (This     : Object;
+      Relative : in Segment.Vectors.Cursor)
+      return     Segment.Extremity;
 
    function Normalize (This : Object) return Object;
 
@@ -69,6 +68,11 @@ package Location.Oriented is
    function Add (Left : Object; Right : Types.Abscissa) return Object;
 
    function Minus (Left, Right : Object) return Types.Abscissa;
+
+   function Minus
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Types.Abscissa;
 
    Location_Are_Not_Comparable : exception;
 

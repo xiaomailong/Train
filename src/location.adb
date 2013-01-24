@@ -54,8 +54,8 @@ package body Location is
       Delta_Segment    := 0.0;
       Cursor           := This.Reference;
       Cursor_Extremity := Segment.Incrementing;
-      Incrementing_Loop : while Cursor /= Relative
-        and then                Dynamic_Track.Is_Linked
+      Incrementing_Loop : while Cursor /= Relative and
+                                Dynamic_Track.Is_Linked
                                    (Cursor,
                                     Cursor_Extremity)
       loop
@@ -82,8 +82,8 @@ package body Location is
       Delta_Segment    := 0.0;
       Cursor           := This.Reference;
       Cursor_Extremity := Segment.Decrementing;
-      while Cursor /= Relative
-        and then Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
+      while Cursor /= Relative and
+            Dynamic_Track.Is_Linked (Cursor, Cursor_Extremity)
       loop
          Dynamic_Track.Next (Cursor, Cursor_Extremity);
          Delta_Segment := Delta_Segment +
@@ -170,8 +170,8 @@ package body Location is
    begin
       Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Incrementing;
-      while Cursor /= Right.Reference
-        and then Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
+      while Cursor /= Right.Reference and
+            Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
       loop
          Current_Track.all.Next (Cursor, Cursor_Extremity);
 
@@ -183,8 +183,8 @@ package body Location is
       end if;
       Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Decrementing;
-      while Cursor /= Right.Reference
-        and then Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
+      while Cursor /= Right.Reference and
+            Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
       loop
          Current_Track.all.Next (Cursor, Cursor_Extremity);
          exit when Cursor = Left.Reference;

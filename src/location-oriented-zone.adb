@@ -31,7 +31,7 @@ package body Location.Oriented.Zone is
    function From_Segment (S : Segment.Vectors.Cursor) return Object is
    begin
       return Create
-               (Create (S, 0.0, Segment.Decrementing).Opposite,
+               (Create (S, 0.0, Segment.Incrementing),
                 Track.Element (S).Max_Abscissa);
    end From_Segment;
 
@@ -110,10 +110,8 @@ package body Location.Oriented.Zone is
    function Equal (Left, Right : Object) return Boolean is
    begin
       return Comparable (Left, Right)
-            and then ((Location.Oriented.Equal (Left.Zero, Right.Zero) and
-                       Location.Oriented.Equal (Left.Max, Right.Max)) or
-                      (Location.Oriented.Equal (Left.Zero, Right.Max) and
-                       Location.Oriented.Equal (Left.Max, Right.Zero)));
+            and then ((Left.Zero = Right.Zero and Left.Max = Right.Max) or
+                      (Left.Zero = Right.Max and Left.Max = Right.Zero));
    end Equal;
 
    function Inter (Left, Right : Object) return Object is
