@@ -17,6 +17,8 @@ with Types;
 with Segment.Vectors;
 with Track;
 
+generic
+   Current_Track : access constant Track.Object;
 package Location is
 
    type Object is tagged private;
@@ -42,56 +44,51 @@ package Location is
 
    function Normal (This : Object) return Boolean;
 
-   function Normalize
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Object;
+   function Normalize (This : Object) return Object;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Comparable (Left, Right : Object) return Boolean;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Equal (Left, Right : Object) return Boolean;
 
    function LowerThan
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Boolean;
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Boolean;
 
-   function LowerThan
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function LowerThan (Left, Right : Object) return Boolean;
 
    function Add
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object;
+     (Reference : Segment.Vectors.Cursor;
+      Left      : Object;
+      Right     : Types.Abscissa)
+      return      Object;
 
-   function Add
-     (Current_Track : Track.Object;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object;
+   function Add (Left : Object; Right : Types.Abscissa) return Object;
+
+   function Minus (Left, Right : Object) return Types.Abscissa;
 
    function Minus
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Types.Abscissa;
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Types.Abscissa;
 
-   function Minus
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Types.Abscissa;
+   function "=" (Left, Right : Object'Class) return Boolean;
 
+   function "<" (Left, Right : Object'Class) return Boolean;
+
+   function "+"
+     (Left  : Object'Class;
+      Right : Types.Abscissa)
+      return  Object'Class;
+
+   function "-"
+     (Left  : Object'Class;
+      Right : Types.Abscissa)
+      return  Object'Class;
+
+   function "-" (Left, Right : Object'Class) return Types.Abscissa;
+
+   function "abs" (X : Object'Class) return Object'Class;
    -- Exceptions
 
    No_Link_With_Segment : exception;

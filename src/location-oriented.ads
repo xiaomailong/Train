@@ -13,6 +13,8 @@
 --  You should have received a copy of the GNU General Public License along with
 --  this program.  If not, see http://www.gnu.org/licenses/.
 
+generic
+   Current_Track : access constant Track.Object;
 package Location.Oriented is
 
    type Object is new Location.Object with private;
@@ -43,54 +45,30 @@ package Location.Oriented is
       Relative      : in Segment.Vectors.Cursor)
       return          Segment.Extremity;
 
-   function Normalize
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Object;
+   function Normalize (This : Object) return Object;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Comparable (Left, Right : Object) return Boolean;
 
-   function Same_Extremity
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Same_Extremity (Left, Right : Object) return Boolean;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Equal (Left, Right : Object) return Boolean;
 
    function LowerThan
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Boolean;
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Boolean;
 
-   function LowerThan
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function LowerThan (Left, Right : Object) return Boolean;
 
    function Add
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object;
+     (Reference : Segment.Vectors.Cursor;
+      Left      : Object;
+      Right     : Types.Abscissa)
+      return      Object;
 
-   function Add
-     (Current_Track : Track.Object;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object;
+   function Add (Left : Object; Right : Types.Abscissa) return Object;
 
-   function Minus
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Types.Abscissa;
+   function Minus (Left, Right : Object) return Types.Abscissa;
 
    Location_Are_Not_Comparable : exception;
 

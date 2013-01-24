@@ -18,22 +18,22 @@ with Types;
 with Track;
 with Segment;
 with Segment.Vectors;
-with Segment.Ends;
 with Switch;
 with Switch.Vectors;
 with Location;
 with Location.Oriented;
-with Location.Topo;
-with Zone;
+with Location.Oriented.Ends;
+with Location.Oriented.Zone;
 
 procedure Test_Track is
 
    Test_Fail : exception;
 
    procedure Eyebrown is
-      Eyebrown_Shape : aliased Track.Object                                :=
-         Track.Create;
-      Size           : constant array (Positive range <>) of Types.Length  :=
+      Eyebrown_Shape : aliased Track.Object := Track.Create;
+      package Eyebrown_Loc is new Location (Eyebrown_Shape'Access);
+      use type Eyebrown_Loc.Object;
+      Size : constant array (Positive range <>) of Types.Length :=
         (1 => 5.0,
          2 => 15.0,
          3 => 25.0,
@@ -42,7 +42,7 @@ procedure Test_Track is
       Main_Segment                       : Segment.Vectors.Cursor;
       Upstream_Switch, Downstream_Switch : Switch.Vectors.Cursor;
 
-      L1, L1p, L2, L3 : Location.Object;
+      L1, L1p, L2, L3 : Eyebrown_Loc.Object;
       Abscs           : constant array (Positive range <>) of Types.Abscissa :=
         (1 => 1.0,
          2 => 3.0,
@@ -53,9 +53,6 @@ procedure Test_Track is
       L1_L3         : constant := 19.0;
       -- Negation because High (L3) reverse the reference from L1 and L2
       L3_L2 : constant := -(L1_L2_By_High - L1_L3);
-
-      package Eyebrown_Topology is new Location.Topo (Eyebrown_Shape'Access);
-      use Eyebrown_Topology;
 
       use type Types.Meter_Precision_Millimeter;
 
@@ -80,9 +77,9 @@ procedure Test_Track is
            (Segment.Create (Size (4)),
             Up_Segment);
 
-         L1 := Location.Create (Up_Segment, Abscs (1));
-         L2 := Location.Create (Down_Segment, Abscs (2));
-         L3 := Location.Create (High_Segment, Abscs (3));
+         L1 := Eyebrown_Loc.Create (Up_Segment, Abscs (1));
+         L2 := Eyebrown_Loc.Create (Down_Segment, Abscs (2));
+         L3 := Eyebrown_Loc.Create (High_Segment, Abscs (3));
 
          Eyebrown_Shape.Add_Link
            (Up_Segment,
@@ -130,11 +127,11 @@ procedure Test_Track is
 
       -- Test location comparaison
       L1p :=
-        Location.Object (L2 +
-                         (-L2.Abscissa -
-                          Size (1) -
-                          Size (2) +
-                          L1.Abscissa));
+        Eyebrown_Loc.Object (L2 +
+                             (-L2.Abscissa -
+                              Size (1) -
+                              Size (2) +
+                              L1.Abscissa));
       if L1 /= L2
       then
          -- Test OK
@@ -181,8 +178,13 @@ procedure Test_Track is
    end Eyebrown;
 
    procedure Circle is
-      Circle_Line                                                            : 
-aliased Track.Object := Track.Create;
+      Circle_Line : aliased Track.Object := Track.Create;
+      package Circle_Loc is new Location (Circle_Line'Access);
+      package Circle_Loc_Oriented is new Circle_Loc.Oriented (
+         Circle_Line'Access);
+      use type Circle_Loc.Object'Class;
+      package Circle_Loc_Ends is new Circle_Loc_Oriented.Ends;
+
       Size                                                                   : 
 constant array (Positive range <>) of Types.Length :=
         (1 => 25.0,
@@ -193,14 +195,11 @@ constant array (Positive range <>) of Types.Length :=
       L1, L2, High                                                           :
         Segment.Vectors.Cursor;
       Signal_1_S, Signal_1_N, Signal_1_R, Signal_2_S, Signal_2_N, Signal_2_R :
-        Location.Oriented.Object;
+        Circle_Loc_Oriented.Object;
 
       To_Switch : constant := 5.0;
 
       use type Types.Meter_Precision_Millimeter;
-
-      package Topology is new Location.Topo (Circle_Line'Access);
-      use Topology;
 
    begin
 
@@ -242,18 +241,18 @@ constant array (Positive range <>) of Types.Length :=
 
       -- Create Signals
       Signal_1_S :=
-        Location.Oriented.Object (Segment.Ends.Zero (L2) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Zero (L2) - To_Switch);
       Signal_1_N :=
-        Location.Oriented.Object (Segment.Ends.Max (L1) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Max (L1) - To_Switch);
       Signal_1_R :=
-        Location.Oriented.Object (Segment.Ends.Zero (High) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Zero (High) - To_Switch);
 
       Signal_2_S :=
-        Location.Oriented.Object (Segment.Ends.Max (L2) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Max (L2) - To_Switch);
       Signal_2_N :=
-        Location.Oriented.Object (Segment.Ends.Zero (L1) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Zero (L1) - To_Switch);
       Signal_2_R :=
-        Location.Oriented.Object (Segment.Ends.Max (High) - To_Switch);
+        Circle_Loc_Oriented.Object (Circle_Loc_Ends.Max (High) - To_Switch);
 
       Circle_Line.Set (S1, 1);
       Circle_Line.Set (S2, 2);
@@ -294,7 +293,7 @@ constant array (Positive range <>) of Types.Length :=
          raise Test_Fail;
 
       exception
-         when Location.Oriented.Location_Are_Not_Comparable =>
+         when Circle_Loc_Oriented.Location_Are_Not_Comparable =>
             -- Test Ok
             null;
       end;
@@ -337,8 +336,13 @@ constant array (Positive range <>) of Types.Length :=
 
    procedure Station is
       Station_Line : aliased Track.Object := Track.Create;
-      package Topo is new Location.Topo (Station_Line'Access);
-      use Topo;
+      package Station_Loc is new Location (Station_Line'Access);
+      package Station_Loc_Oriented is new Station_Loc.Oriented (
+         Station_Line'Access);
+      use type Station_Loc.Object'Class;
+      package Station_Loc_Ends is new Station_Loc_Oriented.Ends;
+      package Station_Zone is new Station_Loc_Oriented.Zone (
+         Station_Line'Access);
 
       Down                   :
         array (Positive range 1 .. 3) of Segment.Vectors.Cursor;
@@ -357,14 +361,14 @@ constant array (Positive range <>) of Types.Length :=
          10.0;
       Down_Switch, Up_Switch : Switch.Vectors.Cursor;
 
-      Station_Up, Station_Down                       : Zone.Object;
+      Station_Up, Station_Down                       : Station_Zone.Object;
       Up_Station_Absc                                : constant
         Types.Meter_Precision_Millimeter := 1.0;
       Down_Station_Absc                              : constant
         Types.Meter_Precision_Millimeter := 4.0;
       Station_Length                                 : constant
         Types.Meter_Precision_Millimeter := 10.0;
-      Station_Protection_Down, Station_Protection_Up : Zone.Object;
+      Station_Protection_Down, Station_Protection_Up : Station_Zone.Object;
       Station_Anticipation                           : constant
         Types.Meter_Precision_Millimeter := 5.0;
 
@@ -418,64 +422,62 @@ constant array (Positive range <>) of Types.Length :=
 
       -- Define Station
       Station_Down :=
-         Zone.Create
-           (Location.Oriented.Object (Segment.Ends.Zero (Down (2)).Opposite +
-                                      Down_Station_Absc),
+         Station_Zone.Create
+           (Station_Loc_Oriented.Object (Station_Loc_Ends.Zero (Down (2)).
+        Opposite +
+                                         Down_Station_Absc),
             Station_Length);
 
       Station_Up :=
-         Zone.Create
-           (Location.Oriented.Object (Segment.Ends.Max (Up (2)).Opposite +
-                                      Up_Station_Absc),
+         Station_Zone.Create
+           (Station_Loc_Oriented.Object (Station_Loc_Ends.Max (Up (2)).Opposite
+                                         +
+                                         Up_Station_Absc),
             Station_Length);
       -- Define Protection, covering station + anticipation
       Station_Protection_Down :=
-         Zone.Create
-           (Station_Down.Max (Station_Line).Opposite,
+         Station_Zone.Create
+           (Station_Down.Max.Opposite,
             Station_Length + Station_Anticipation);
       Station_Protection_Up   :=
-         Zone.Create
-           (Station_Up.Max (Station_Line).Opposite,
+         Station_Zone.Create
+           (Station_Up.Max.Opposite,
             Station_Length + Station_Anticipation);
 
       declare
-         Up_N, Up_Inter, Down_S : Zone.Object;
+         Up_N, Up_Inter, Down_S : Station_Zone.Object;
       begin
          Up_N     :=
-            Zone.Create
-              (Segment.Ends.Zero (Up (1)).Opposite,
+            Station_Zone.Create
+              (Station_Loc_Ends.Zero (Up (1)).Opposite,
                Station_Anticipation - Up_Station_Absc);
          Up_Inter :=
-            Zone.Create
-              (Segment.Ends.Max (Inter).Opposite,
+            Station_Zone.Create
+              (Station_Loc_Ends.Max (Inter).Opposite,
                Station_Anticipation - Up_Station_Absc);
          Down_S   :=
-            Zone.Create
-              (Segment.Ends.Max (Down (1)).Opposite,
+            Station_Zone.Create
+              (Station_Loc_Ends.Max (Down (1)).Opposite,
                Station_Anticipation - Down_Station_Absc);
 
          Station_Line.Set (Down_Switch, 1);
          Station_Line.Set (Up_Switch, 1);
-         if Zone.Equal
-              (Station_Line,
-               Down_S,
-               Zone.Inter
-                  (Station_Line,
-                   Station_Protection_Down,
-                   Zone.From_Segment (Down (1))))
+         if Station_Zone.Equal
+              (Down_S,
+               Station_Zone.Inter
+                  (Station_Protection_Down,
+                   Station_Zone.From_Segment (Down (1))))
          then
             -- test OK
             null;
          else
             raise Test_Fail;
          end if;
-         if Zone.Equal
-              (Station_Line,
-               Up_N,
-               Zone.Inter
-                  (Station_Line,
-                   Station_Protection_Up,
-                   Zone.From_Segment (Up (1))))
+         if Station_Zone.Equal
+              (Up_N,
+               Station_Zone.Inter
+                  (Station_Protection_Up,
+                   Station_Zone.From_Segment (Up (1))))
          then
             -- test OK
             null;
@@ -483,13 +485,11 @@ constant array (Positive range <>) of Types.Length :=
             raise Test_Fail;
          end if;
          Station_Line.Set (Up_Switch, 2);
-         if Zone.Equal
-              (Station_Line,
-               Up_Inter,
-               Zone.Inter
-                  (Station_Line,
-                   Station_Protection_Up,
-                   Zone.From_Segment (Inter)))
+         if Station_Zone.Equal
+              (Up_Inter,
+               Station_Zone.Inter
+                  (Station_Protection_Up,
+                   Station_Zone.From_Segment (Inter)))
          then
             -- test OK
             null;

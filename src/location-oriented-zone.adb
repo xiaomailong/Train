@@ -15,9 +15,9 @@
 
 with Constants;
 with Segment;
-with Segment.Ends;
 
-package body Zone is
+package body Location.Oriented.Zone is
+   use type Location.Object'Class;
 
    function Create
      (Start  : Location.Oriented.Object;
@@ -31,7 +31,7 @@ package body Zone is
    function From_Segment (S : Segment.Vectors.Cursor) return Object is
    begin
       return Create
-               (Segment.Ends.Zero (S).Opposite,
+               (Create (S, 0.0, Segment.Decrementing).Opposite,
                 Track.Element (S).Max_Abscissa);
    end From_Segment;
 
@@ -42,20 +42,12 @@ package body Zone is
                 Segment.Opposite_Extremity (This.Start.Extremity));
    end Zero;
 
-   function Max
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Location.Oriented.Object
-   is
+   function Max (This : Object) return Location.Oriented.Object is
    begin
-      return Location.Oriented.Add (Current_Track, This.Start, This.Length);
+      return Location.Oriented.Add (This.Start, This.Length);
    end Max;
 
-   function Constructible
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Boolean
-   is
+   function Constructible (This : Object) return Boolean is
       Cursor           : Segment.Vectors.Cursor;
       Cursor_Length    : Types.Abscissa;
       Cursor_Extremity : Segment.Extremity;
@@ -106,70 +98,45 @@ package body Zone is
       return This.Length > Constants.Millimeter;
    end Is_Not_Null;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Comparable (Left, Right : Object) return Boolean is
    begin
-      return Left.Constructible (Current_Track) and
-             Right.Constructible (Current_Track) and
+      return Left.Constructible and
+             Right.Constructible and
              Location.Comparable
-                (Current_Track,
-                 Left.Start.Non_Oriented,
+                (Left.Start.Non_Oriented,
                  Right.Start.Non_Oriented);
    end Comparable;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Equal (Left, Right : Object) return Boolean is
    begin
-      return Comparable (Current_Track, Left, Right)
-            and then ((Location.Oriented.Equal
-                          (Current_Track,
-                           Left.Zero,
-                           Right.Zero) and
-                       Location.Oriented.Equal
-                          (Current_Track,
-                           Left.Max (Current_Track),
-                           Right.Max (Current_Track))) or
-                      (Location.Oriented.Equal
-                          (Current_Track,
-                           Left.Zero,
-                           Right.Max (Current_Track)) and
-                       Location.Oriented.Equal
-                          (Current_Track,
-                           Left.Max (Current_Track),
-                           Right.Zero)));
+      return Comparable (Left, Right)
+            and then ((Location.Oriented.Equal (Left.Zero, Right.Zero) and
+                       Location.Oriented.Equal (Left.Max, Right.Max)) or
+                      (Location.Oriented.Equal (Left.Zero, Right.Max) and
+                       Location.Oriented.Equal (Left.Max, Right.Zero)));
    end Equal;
 
-   function Inter
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Object
-   is
+   function Inter (Left, Right : Object) return Object is
       A1, B1, A2, B2, I, J : Location.Object;
       Start                : Location.Oriented.Object;
       Length               : Types.Meter_Precision_Millimeter;
    begin
 
       A1 := Left.Zero.Non_Oriented;
-      B1 := Left.Max (Current_Track).Non_Oriented;
+      B1 := Left.Max.Non_Oriented;
       A2 := Right.Zero.Non_Oriented;
-      B2 := Right.Max (Current_Track).Non_Oriented;
+      B2 := Right.Max.Non_Oriented;
 
       declare
          Swap : Location.Object;
       begin
-         if not Location.LowerThan (Current_Track, A1.Reference, A1, B1)
+         if not Location.LowerThan (A1.Reference, A1, B1)
          then
             Swap := A1;
             A1   := B1;
             B1   := Swap;
          end if;
-         if not Location.LowerThan (Current_Track, A1.Reference, A2, B2)
+         if not Location.LowerThan (A1.Reference, A2, B2)
          then
             Swap := A2;
             A2   := B2;
@@ -178,20 +145,20 @@ package body Zone is
       end;
 
       -- left equiv [A1;B1], right equiv [A2;B2] relative to A1.Reference
-      if Location.LowerThan (Current_Track, A1.Reference, A1, A2)
+      if Location.LowerThan (A1.Reference, A1, A2)
       then
          I := A2;
       else
          I := A1;
       end if;
-      if Location.LowerThan (Current_Track, A1.Reference, B1, B2)
+      if Location.LowerThan (A1.Reference, B1, B2)
       then
          J := B1;
       else
          J := B2;
       end if;
 
-      Length := Location.Minus (Current_Track, A1.Reference, J, I);
+      Length := Location.Minus (A1.Reference, J, I);
       Start  :=
          Location.Oriented.Create
            (I,
@@ -204,4 +171,4 @@ package body Zone is
 
    end Inter;
 
-end Zone;
+end Location.Oriented.Zone;

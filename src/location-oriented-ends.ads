@@ -14,13 +14,13 @@
 --  this program.  If not, see http://www.gnu.org/licenses/.
 
 with Segment.Vectors;
-with Location.Oriented;
 
-package Segment.Ends is
+generic
+package Location.Oriented.Ends is
 
    function Zero
      (S    : Segment.Vectors.Cursor)
       return Location.Oriented.Object;
    function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object;
 
-end Segment.Ends;
+end Location.Oriented.Ends;

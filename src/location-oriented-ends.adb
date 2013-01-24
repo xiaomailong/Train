@@ -13,26 +13,24 @@
 --  You should have received a copy of the GNU General Public License along with
 --  this program.  If not, see http://www.gnu.org/licenses/.
 
-generic
-   Current_Track : access constant Track.Object;
-package Location.Topo is
+with Track;
 
-   function "=" (Left, Right : Object'Class) return Boolean;
+package body Location.Oriented.Ends is
 
-   function "<" (Left, Right : Object'Class) return Boolean;
+   function Zero
+     (S    : Segment.Vectors.Cursor)
+      return Location.Oriented.Object
+   is
+   begin
+      return Location.Oriented.Create (S, 0.0, Segment.Decrementing);
+   end Zero;
 
-   function "+"
-     (Left  : Object'Class;
-      Right : Types.Abscissa)
-      return  Object'Class;
+   function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object is
+   begin
+      return Location.Oriented.Create
+               (S,
+                Track.Element (S).Max_Abscissa,
+                Segment.Incrementing);
+   end Max;
 
-   function "-"
-     (Left  : Object'Class;
-      Right : Types.Abscissa)
-      return  Object'Class;
-
-   function "-" (Left, Right : Object'Class) return Types.Abscissa;
-
-   function "abs" (X : Object'Class) return Object'Class;
-
-end Location.Topo;
+end Location.Oriented.Ends;

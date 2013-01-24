@@ -116,11 +116,7 @@ package body Location is
          0.0 .. Track.Element (This.Reference_Segment).Max_Abscissa;
    end Normal;
 
-   function Normalize
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Object
-   is
+   function Normalize (This : Object) return Object is
       Cursor           : Segment.Vectors.Cursor;
       Cursor_Extremity : Segment.Extremity;
 
@@ -153,7 +149,7 @@ package body Location is
             Result.Reference_Abscissa := -Result.Abscissa;
          end if;
 
-         Current_Track.Next (Cursor, Cursor_Extremity);
+         Current_Track.all.Next (Cursor, Cursor_Extremity);
 
          if Cursor_Extremity = Segment.Decrementing
          then
@@ -167,11 +163,7 @@ package body Location is
       return Result;
    end Normalize;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Comparable (Left, Right : Object) return Boolean is
       Cursor           : Segment.Vectors.Cursor;
       Cursor_Extremity : Segment.Extremity;
       use type Segment.Vectors.Cursor;
@@ -179,9 +171,9 @@ package body Location is
       Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Incrementing;
       while Cursor /= Right.Reference
-        and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
+        and then Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
       loop
-         Current_Track.Next (Cursor, Cursor_Extremity);
+         Current_Track.all.Next (Cursor, Cursor_Extremity);
 
          exit when Cursor = Left.Reference;
       end loop;
@@ -192,9 +184,9 @@ package body Location is
       Cursor           := Left.Reference;
       Cursor_Extremity := Segment.Decrementing;
       while Cursor /= Right.Reference
-        and then Current_Track.Is_Linked (Cursor, Cursor_Extremity)
+        and then Current_Track.all.Is_Linked (Cursor, Cursor_Extremity)
       loop
-         Current_Track.Next (Cursor, Cursor_Extremity);
+         Current_Track.all.Next (Cursor, Cursor_Extremity);
          exit when Cursor = Left.Reference;
       end loop;
       if Cursor = Right.Reference
@@ -205,14 +197,10 @@ package body Location is
       return False;
    end Comparable;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Equal (Left, Right : Object) return Boolean is
       use type Types.Meter_Precision_Millimeter;
    begin
-      if Left.Abscissa - Right.Abscissa (Current_Track, Left.Reference) in
+      if Left.Abscissa - Right.Abscissa (Current_Track.all, Left.Reference) in
             -Constants.Millimeter .. Constants.Millimeter
       then
          return True;
@@ -226,20 +214,19 @@ package body Location is
    end Equal;
 
    function LowerThan
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Boolean
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Boolean
    is
       Cursor           : Segment.Vectors.Cursor := Left.Reference;
       Cursor_Extremity : Segment.Extremity      := Segment.Incrementing;
       use type Types.Meter_Precision_Millimeter;
    begin
       -- Raise exception if there is a loop
-      Current_Track.End_Of_Route (Cursor, Cursor_Extremity);
+      Current_Track.all.End_Of_Route (Cursor, Cursor_Extremity);
 
-      if Left.Abscissa (Current_Track, Reference) <
-         Right.Abscissa (Current_Track, Reference)
+      if Left.Abscissa (Current_Track.all, Reference) <
+         Right.Abscissa (Current_Track.all, Reference)
       then
          return True;
       else
@@ -248,62 +235,86 @@ package body Location is
 
    end LowerThan;
 
-   function LowerThan
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function LowerThan (Left, Right : Object) return Boolean is
    begin
-      return LowerThan (Current_Track, Left.Reference, Left, Right);
+      return LowerThan (Left.Reference, Left, Right);
    end LowerThan;
 
    function Add
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object
+     (Reference : Segment.Vectors.Cursor;
+      Left      : Object;
+      Right     : Types.Abscissa)
+      return      Object
    is
       Result : Object;
       use type Types.Meter_Precision_Millimeter;
    begin
       Result :=
-        (Reference_Abscissa => Left.Abscissa (Current_Track, Reference) +
+        (Reference_Abscissa => Left.Abscissa (Current_Track.all, Reference) +
                                Right,
          Reference_Segment  => Reference);
-      return Result.Normalize (Current_Track);
+      return Result.Normalize;
    end Add;
 
-   function Add
-     (Current_Track : Track.Object;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object
-   is
+   function Add (Left : Object; Right : Types.Abscissa) return Object is
    begin
-      return Add (Current_Track, Left.Reference, Left, Right);
+      return Add (Left.Reference, Left, Right);
    end Add;
 
    function Minus
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Types.Abscissa
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Types.Abscissa
    is
       use type Types.Meter_Precision_Millimeter;
    begin
-      return Left.Abscissa (Current_Track, Reference) -
-             Right.Abscissa (Current_Track, Reference);
+      return Left.Abscissa (Current_Track.all, Reference) -
+             Right.Abscissa (Current_Track.all, Reference);
    end Minus;
 
-   function Minus
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Types.Abscissa
+   function Minus (Left, Right : Object) return Types.Abscissa is
+      use type Types.Meter_Precision_Millimeter;
+   begin
+      return Minus (Left.Reference, Left, Right);
+   end Minus;
+
+   function "=" (Left, Right : Object'Class) return Boolean is
+   begin
+      return Equal (Left, Right);
+   end "=";
+
+   function "<" (Left, Right : Object'Class) return Boolean is
+   begin
+      return LowerThan (Left, Right);
+   end "<";
+
+   function "+"
+     (Left  : Object'Class;
+      Right : Types.Abscissa)
+      return  Object'Class
+   is
+   begin
+      return Add (Left, Right);
+   end "+";
+
+   function "-"
+     (Left  : Object'Class;
+      Right : Types.Abscissa)
+      return  Object'Class
    is
       use type Types.Meter_Precision_Millimeter;
    begin
-      return Minus (Current_Track, Left.Reference, Left, Right);
-   end Minus;
+      return Add (Left, -Right);
+   end "-";
+
+   function "-" (Left, Right : Object'Class) return Types.Abscissa is
+   begin
+      return Minus (Left, Right);
+   end "-";
+
+   function "abs" (X : Object'Class) return Object'Class is
+   begin
+      return X.Normalize;
+   end "abs";
 
 end Location;

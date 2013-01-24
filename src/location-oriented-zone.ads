@@ -15,10 +15,11 @@
 
 with Types;
 with Track;
-with Location.Oriented;
 with Segment.Vectors;
 
-package Zone is
+generic
+   Current_Track : access constant Track.Object;
+package Location.Oriented.Zone is
 
    type Object is tagged private;
 
@@ -34,32 +35,17 @@ package Zone is
    --  while Start describe an orientation to apply Length,
    --  then Start is toward the inside
    function Zero (This : Object) return Location.Oriented.Object;
-   function Max
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Location.Oriented.Object;
+   function Max (This : Object) return Location.Oriented.Object;
 
-   function Constructible
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Boolean;
+   function Constructible (This : Object) return Boolean;
 
    function Is_Not_Null (This : Object) return Boolean;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Comparable (Left, Right : Object) return Boolean;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean;
+   function Equal (Left, Right : Object) return Boolean;
 
-   function Inter
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Object;
+   function Inter (Left, Right : Object) return Object;
 
 private
 
@@ -68,4 +54,4 @@ private
       Length : Types.Length;
    end record;
 
-end Zone;
+end Location.Oriented.Zone;

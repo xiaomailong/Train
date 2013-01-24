@@ -74,86 +74,57 @@ package body Location.Oriented is
                 This.Extremity);
    end Extremity;
 
-   function Normalize
-     (This          : Object;
-      Current_Track : Track.Object)
-      return          Object
-   is
+   function Normalize (This : Object) return Object is
       Normalized_Non_Oriented : constant Location.Object :=
-         Location.Normalize (Non_Oriented (This), Current_Track);
+         Location.Normalize (Non_Oriented (This));
    begin
       return Create
                (Normalized_Non_Oriented,
-                Current_Track.Relative_Extremity
+                Current_Track.all.Relative_Extremity
                    (Normalized_Non_Oriented.Reference,
                     This.Reference,
                     This.Reference_Extremity));
    end Normalize;
 
-   function Comparable
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Comparable (Left, Right : Object) return Boolean is
    begin
-      return Same_Extremity (Current_Track, Left, Right)
-            and then Comparable
-                        (Current_Track,
-                         Left.Non_Oriented,
-                         Right.Non_Oriented);
+      return Same_Extremity (Left, Right)
+            and then Comparable (Left.Non_Oriented, Right.Non_Oriented);
    end Comparable;
 
-   function Same_Extremity
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Same_Extremity (Left, Right : Object) return Boolean is
       use type Segment.Extremity;
    begin
       return Left.Extremity =
-             Current_Track.Relative_Extremity
+             Current_Track.all.Relative_Extremity
                 (Left.Reference,
                  Right.Reference,
                  Right.Extremity);
    end Same_Extremity;
 
-   function Equal
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function Equal (Left, Right : Object) return Boolean is
    begin
-      return Equal (Current_Track, Non_Oriented (Left), Non_Oriented (Right))
-             and
-             Same_Extremity (Current_Track, Left, Right);
+      return Equal (Non_Oriented (Left), Non_Oriented (Right)) and
+             Same_Extremity (Left, Right);
    end Equal;
 
    function LowerThan
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left, Right   : Object)
-      return          Boolean
+     (Reference   : Segment.Vectors.Cursor;
+      Left, Right : Object)
+      return        Boolean
    is
    begin
-      if not Same_Extremity (Current_Track, Left, Right)
+      if not Same_Extremity (Left, Right)
       then
          raise Location_Are_Not_Comparable;
       end if;
 
-      return LowerThan
-               (Current_Track,
-                Reference,
-                Non_Oriented (Left),
-                Non_Oriented (Right));
+      return LowerThan (Reference, Non_Oriented (Left), Non_Oriented (Right));
    end LowerThan;
 
-   function LowerThan
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Boolean
-   is
+   function LowerThan (Left, Right : Object) return Boolean is
    begin
-      if not Same_Extremity (Current_Track, Left, Right)
+      if not Same_Extremity (Left, Right)
       then
          raise Location_Are_Not_Comparable;
       end if;
@@ -161,65 +132,53 @@ package body Location.Oriented is
       case Left.Reference_Extremity is
          when Segment.Incrementing =>
             return LowerThan
-                     (Current_Track,
-                      Left.Reference,
+                     (Left.Reference,
                       Non_Oriented (Left),
                       Non_Oriented (Right));
          when Segment.Decrementing =>
             return LowerThan
-                     (Current_Track,
-                      Left.Reference,
+                     (Left.Reference,
                       Non_Oriented (Right),
                       Non_Oriented (Left));
       end case;
    end LowerThan;
 
    function Add
-     (Current_Track : Track.Object;
-      Reference     : Segment.Vectors.Cursor;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object
+     (Reference : Segment.Vectors.Cursor;
+      Left      : Object;
+      Right     : Types.Abscissa)
+      return      Object
    is
       Normalized_Non_Oriented : constant Location.Object :=
-         Location.Add (Current_Track, Reference, Non_Oriented (Left), Right);
+         Location.Add (Reference, Non_Oriented (Left), Right);
    begin
       return Create
                (Normalized_Non_Oriented,
-                Current_Track.Relative_Extremity
+                Current_Track.all.Relative_Extremity
                    (Normalized_Non_Oriented.Reference,
                     Left.Reference,
                     Left.Reference_Extremity));
    end Add;
 
-   function Add
-     (Current_Track : Track.Object;
-      Left          : Object;
-      Right         : Types.Abscissa)
-      return          Object
-   is
+   function Add (Left : Object; Right : Types.Abscissa) return Object is
       use type Types.Meter_Precision_Millimeter;
    begin
       case Left.Reference_Extremity is
          when Segment.Incrementing =>
-            return Add (Current_Track, Left.Reference, Left, Right);
+            return Add (Left.Reference, Left, Right);
          when Segment.Decrementing =>
-            return Add (Current_Track, Left.Reference, Left, -Right);
+            return Add (Left.Reference, Left, -Right);
       end case;
    end Add;
 
-   function Minus
-     (Current_Track : Track.Object;
-      Left, Right   : Object)
-      return          Types.Abscissa
-   is
+   function Minus (Left, Right : Object) return Types.Abscissa is
    begin
-      if not Same_Extremity (Current_Track, Left, Right)
+      if not Same_Extremity (Left, Right)
       then
          raise Location_Are_Not_Comparable;
       end if;
 
-      return Minus (Current_Track, Non_Oriented (Left), Non_Oriented (Right));
+      return Minus (Non_Oriented (Left), Non_Oriented (Right));
    end Minus;
 
 end Location.Oriented;
