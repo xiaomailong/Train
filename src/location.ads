@@ -76,6 +76,8 @@ package Location is
 
    function "<" (Left, Right : Object'Class) return Boolean;
 
+   function "<=" (Left, Right : Object'Class) return Boolean;
+
    function "+"
      (Left  : Object'Class;
       Right : Types.Abscissa)

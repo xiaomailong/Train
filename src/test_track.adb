@@ -22,8 +22,8 @@ with Switch;
 with Switch.Vectors;
 with Location;
 with Location.Oriented;
-with Location.Oriented.Ends;
-with Location.Oriented.Zone;
+with Ends;
+with Zone;
 
 procedure Test_Track is
 
@@ -183,7 +183,7 @@ procedure Test_Track is
       package Circle_Loc_Oriented is new Circle_Loc.Oriented (
          Circle_Line'Access);
       use type Circle_Loc.Object'Class;
-      package Circle_Loc_Ends is new Circle_Loc_Oriented.Ends;
+      package Circle_Loc_Ends is new Ends (Circle_Loc_Oriented);
 
       Size                                                                   : 
 constant array (Positive range <>) of Types.Length :=
@@ -335,14 +335,18 @@ constant array (Positive range <>) of Types.Length :=
    end Circle;
 
    procedure Station is
-      Station_Line : aliased Track.Object := Track.Create;
-      package Station_Loc is new Location (Station_Line'Access);
+      Station_Line        : aliased Track.Object                  :=
+         Track.Create;
+      Station_Line_Access : constant access constant Track.Object :=
+         Station_Line'Access;
+      package Station_Loc is new Location (Station_Line_Access);
       package Station_Loc_Oriented is new Station_Loc.Oriented (
-         Station_Line'Access);
-      use type Station_Loc.Object'Class;
-      package Station_Loc_Ends is new Station_Loc_Oriented.Ends;
-      package Station_Zone is new Station_Loc_Oriented.Zone (
-         Station_Line'Access);
+         Station_Line_Access);
+      package Station_Loc_Ends is new Ends (Station_Loc_Oriented);
+      package Station_Zone is new Zone (
+         Station_Line_Access,
+         Station_Loc,
+         Station_Loc_Oriented);
 
       Down                   :
         array (Positive range 1 .. 3) of Segment.Vectors.Cursor;
@@ -372,6 +376,7 @@ constant array (Positive range <>) of Types.Length :=
       Station_Anticipation                           : constant
         Types.Meter_Precision_Millimeter := 5.0;
 
+      use type Station_Loc.Object'Class;
       use type Types.Meter_Precision_Millimeter;
    begin
 

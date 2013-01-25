@@ -13,14 +13,16 @@
 --  You should have received a copy of the GNU General Public License along with
 --  this program.  If not, see http://www.gnu.org/licenses/.
 
+with Location.Oriented;
 with Segment.Vectors;
 
 generic
-package Location.Oriented.Ends is
+   with package Oriented_Location is new Location.Oriented (<>);
+package Ends is
 
    function Zero
      (S    : Segment.Vectors.Cursor)
-      return Location.Oriented.Object;
-   function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object;
+      return Oriented_Location.Object;
+   function Max (S : Segment.Vectors.Cursor) return Oriented_Location.Object;
 
-end Location.Oriented.Ends;
+end Ends;

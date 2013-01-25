@@ -288,6 +288,11 @@ package body Location is
       return LowerThan (Left, Right);
    end "<";
 
+   function "<=" (Left, Right : Object'Class) return Boolean is
+   begin
+      return Left < Right or Left = Right;
+   end "<=";
+
    function "+"
      (Left  : Object'Class;
       Right : Types.Abscissa)

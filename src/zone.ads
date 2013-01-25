@@ -15,16 +15,23 @@
 
 with Types;
 with Track;
+with Location;
+with Location.Oriented;
 with Segment.Vectors;
 
 generic
    Current_Track : access constant Track.Object;
-package Location.Oriented.Zone is
+   with package NO_Location is new Location (Current_Track);
+   with package Oriented_Location is new NO_Location.Oriented (
+      Current_Track);
+package Zone is
+   use NO_Location;
+   use Oriented_Location;
 
    type Object is tagged private;
 
    function Create
-     (Start  : Location.Oriented.Object;
+     (Start  : Oriented_Location.Object;
       Length : Types.Length)
       return   Object;
 
@@ -34,8 +41,8 @@ package Location.Oriented.Zone is
    --  Zero and Max are oriented to the outside
    --  while Start describe an orientation to apply Length,
    --  then Start is toward the inside
-   function Zero (This : Object) return Location.Oriented.Object;
-   function Max (This : Object) return Location.Oriented.Object;
+   function Zero (This : Object) return Oriented_Location.Object;
+   function Max (This : Object) return Oriented_Location.Object;
 
    function Constructible (This : Object) return Boolean;
 
@@ -47,11 +54,29 @@ package Location.Oriented.Zone is
 
    function Inter (Left, Right : Object) return Object;
 
+   function Union (Left, Right : Object) return Object;
+
+   function Exclusion (Left, Right : Object) return Object;
+
+   function Is_In (Left, Right : Object) return Boolean;
+
+   function Is_In (Left : NO_Location.Object; Right : Object) return Boolean;
+
+   function "=" (Left, Right : Object'Class) return Boolean;
+
+   function "*" (Left, Right : Object'Class) return Object'Class;
+
+   function "+" (Left, Right : Object'Class) return Object'Class;
+
+   function "-" (Left, Right : Object'Class) return Object'Class;
+
+   Non_Contiguous_Zone : exception;
+
 private
 
    type Object is tagged record
-      Start  : Location.Oriented.Object;
+      Start  : Oriented_Location.Object;
       Length : Types.Length;
    end record;
 
-end Location.Oriented.Zone;
+end Zone;

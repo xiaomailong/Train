@@ -49,7 +49,7 @@ package body Location.Oriented is
       return Create (Relative, Abscissa, Segment.Incrementing);
    end Create;
 
-   function Opposite (This : Location.Oriented.Object) return Object is
+   function Opposite (This : Object) return Object is
    begin
       return Create
                (This.Non_Oriented,

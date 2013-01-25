@@ -15,22 +15,22 @@
 
 with Track;
 
-package body Location.Oriented.Ends is
+package body Ends is
 
    function Zero
      (S    : Segment.Vectors.Cursor)
-      return Location.Oriented.Object
+      return Oriented_Location.Object
    is
    begin
-      return Location.Oriented.Create (S, 0.0, Segment.Decrementing);
+      return Oriented_Location.Create (S, 0.0, Segment.Decrementing);
    end Zero;
 
-   function Max (S : Segment.Vectors.Cursor) return Location.Oriented.Object is
+   function Max (S : Segment.Vectors.Cursor) return Oriented_Location.Object is
    begin
-      return Location.Oriented.Create
+      return Oriented_Location.Create
                (S,
                 Track.Element (S).Max_Abscissa,
                 Segment.Incrementing);
    end Max;
 
-end Location.Oriented.Ends;
+end Ends;
